@@ -10,7 +10,7 @@ namespace Template
 {
 	public class OpenTKApp : GameWindow
 	{
-		static int screenID;
+		static int screenID1, screenID2;
 		static Game game;
 		static bool terminated = false;
 		protected override void OnLoad( EventArgs e )
@@ -22,15 +22,18 @@ namespace Template
 			GL.Hint( HintTarget.PerspectiveCorrectionHint, HintMode.Nicest );
 			ClientSize = new Size( 1024, 512 );
 			game = new Game();
-			game.screen = new Surface( Width, Height );
-			Sprite.target = game.screen;
-			screenID = game.screen.GenTexture();
+			game.screen1 = new Surface( Width / 2, Height );
+			game.screen2 = new Surface(Width / 2, Height);
+			Sprite.target = game.screen1;
+			screenID1 = game.screen1.GenTexture();
+			screenID2 = game.screen2.GenTexture();
 			game.Init();
 		}
 		protected override void OnUnload( EventArgs e )
 		{
 			// called upon app close
-			GL.DeleteTextures( 1, ref screenID );
+			GL.DeleteTextures(1, ref screenID1);
+			GL.DeleteTextures(1, ref screenID2);
 			Environment.Exit( 0 ); // bypass wait for key on CTRL-F5
 		}
 		protected override void OnResize( EventArgs e )
@@ -57,11 +60,11 @@ namespace Template
 				return;
 			}
 			// convert Game.screen to OpenGL texture
-			GL.BindTexture( TextureTarget.Texture2D, screenID );
+			GL.BindTexture( TextureTarget.Texture2D, screenID1 );
 			GL.TexImage2D( TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, 
-						   game.screen.width, game.screen.height, 0, 
+						   game.screen1.width, game.screen1.height, 0, 
 						   OpenTK.Graphics.OpenGL.PixelFormat.Bgra, 
-						   PixelType.UnsignedByte, game.screen.pixels 
+						   PixelType.UnsignedByte, game.screen1.pixels 
 						 );
 			// clear window contents
 			GL.Clear( ClearBufferMask.ColorBufferBit );
@@ -73,9 +76,20 @@ namespace Template
 			// draw screen filling quad
 			GL.Begin( PrimitiveType.Quads );
 			GL.TexCoord2( 0.0f, 1.0f ); GL.Vertex2( -1.0f, -1.0f );
-			GL.TexCoord2( 1.0f, 1.0f ); GL.Vertex2(  1.0f, -1.0f );
-			GL.TexCoord2( 1.0f, 0.0f ); GL.Vertex2(  1.0f,  1.0f );
+			GL.TexCoord2( 1.0f, 1.0f ); GL.Vertex2(  0.0f, -1.0f );
+			GL.TexCoord2( 1.0f, 0.0f ); GL.Vertex2(  0.0f,  1.0f );
 			GL.TexCoord2( 0.0f, 0.0f ); GL.Vertex2( -1.0f,  1.0f );
+			GL.End();
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
+						   game.screen2.width, game.screen2.height, 0,
+						   OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
+						   PixelType.UnsignedByte, game.screen2.pixels
+						 );
+			GL.Begin(PrimitiveType.Quads);
+			GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(0.0f, -1.0f);
+			GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(1.0f, -1.0f);
+			GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(1.0f, 1.0f);
+			GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(0.0f, 1.0f);
 			GL.End();
 			// tell OpenTK we're done rendering
 			SwapBuffers();

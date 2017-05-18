@@ -115,10 +115,10 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			Primitives.Add(new Plane(new Vector3(0f,0f,0f), new Vector3(0,1,0), new Vector3(1,1,1)));
-			Primitives.Add(new Sphere(new Vector3(-3f, 0f,6f), 1.5f, new Vector3(1,0,0)));
-			Primitives.Add(new Sphere(new Vector3(0f, 0f, 6f), 1.5f, new Vector3(0,1,0)));
-			Primitives.Add(new Sphere(new Vector3(3f, 0f, 6f), 1.5f, new Vector3(0,0,1)));
+			Primitives.Add(new Plane(new Vector3(0f,0f,6f), new Vector3(0,1,0), new Vector3(1,1,1)));
+			Primitives.Add(new Sphere(new Vector3(-3f, -2f,6f), 1.5f, new Vector3(1,0,0)));
+			Primitives.Add(new Sphere(new Vector3(0f, -2f, 6f), 1.5f, new Vector3(0,1,0)));
+			Primitives.Add(new Sphere(new Vector3(3f, -2f, 6f), 1.5f, new Vector3(0,0,1)));
 		}
 
 		public Intersection NearestIntersect(Ray ray)

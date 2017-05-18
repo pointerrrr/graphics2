@@ -47,12 +47,12 @@ namespace Template
 			Intersection result = new Intersection();
 			result.Primitive = this;
 			Vector3 centerVector = Position - ray.Origin;
-			float xDist = Vector3.Dot(centerVector, ray.Direction);
+			float xDist = ( Vector3.Dot(centerVector, ray.Direction));
 			Vector3 yVector = centerVector - xDist * ray.Direction;
 			float psqr = Vector3.Dot(yVector, yVector);
 			float radiussqr = Radius * Radius;
 			if (psqr > radiussqr) return null;
-			xDist -= (float) Math.Sqrt(radiussqr - psqr);
+			xDist = - xDist +  (float) Math.Sqrt(radiussqr - psqr);
 			if (( xDist < ray.Distance ))
 				if (xDist > 0)
 				{
@@ -92,7 +92,8 @@ namespace Template
 			result.Primitive = this;
 			float d = -( ray.Direction.X * Position.X + ray.Direction.Y * Position.Y + ray.Direction.Z * Position.Z );
 			float t = -( Vector3.Dot(ray.Origin, Normal) + d ) / Vector3.Dot(ray.Direction, Normal);
-			
+			if (t < 0)
+				return null;
 			result.IntersectionPoint = ray.Origin + t * ray.Direction;
 			result.Distance = (float) Math.Sqrt( Vector3.Dot(result.IntersectionPoint, result.IntersectionPoint));
 			return result;

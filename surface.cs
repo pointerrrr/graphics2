@@ -142,12 +142,15 @@ namespace Template
 		public void Circle(int x1, int y1, int radius, int c)
 		{
 			
-			for(float x = 0 - radius/2; x < radius; x++)
-				for(float y = 0 - radius/2; y < radius; y++)
+			for(float x = 0 - radius; x < radius; x++)
+				for(float y = 0 - radius; y < radius; y++)
 				{
-					if (x * x + y * y - radius < 0.1)
+					if ((x * x) + (y * y) < radius * radius )
 					{
-						Plot((int) (x1 + x), (int)(y1 + y), c);
+						int xtemp = (int)(x1 + x);
+						int ytemp = (int)(y1 + y);
+						if (xtemp > 0 && xtemp < width && ytemp > 0 && ytemp < height)
+							Plot(xtemp, ytemp, c);
 					}						
 				}
 		}
