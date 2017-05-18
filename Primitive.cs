@@ -52,11 +52,11 @@ namespace Template
 			float psqr = Vector3.Dot(yVector, yVector);
 			float radiussqr = Radius * Radius;
 			if (psqr > radiussqr) return null;
-			xDist -= (float) Math.Sqrt(radiussqr - psqr);
+			xDist += (float) Math.Sqrt(radiussqr - psqr);
+			xDist = -xDist;
 			if (xDist > 0)
 			{
 				result.Distance = xDist;
-				ray.Distance = xDist;
 			}
 			return result;
 			/*
@@ -127,7 +127,6 @@ namespace Template
 			Color = color;
 		}
 
-
 		// based off: http://cmichel.io/howto-raytracer-ray-plane-intersection-theory/
 		public override Intersection Intersect(Ray ray)
 		{
@@ -135,16 +134,12 @@ namespace Template
 			result.Primitive = this;
 			Vector3 direction = ray.Direction;
 			float denominator = Vector3.Dot(direction, Normal);
-
 			if (Math.Abs(denominator) < 0.0001f)
 				return null;
 			float distance = - Vector3.Dot(Position - ray.Origin, Normal) / denominator;
 			if (distance < 0)
 				return null;
-
 			result.Distance = distance;
-			ray.Distance = distance;
-
 			return result;
 		}
 
