@@ -40,7 +40,7 @@ namespace Template
 				{
 					ray = new Ray();
 					ray.Origin = Camera.Position;
-					ray.Direction = Vector3.Normalize ((ray.Origin - new Vector3(Camera.Screen.p0.X + (2f/512f)*x, Camera.Screen.p0.Y + (2f/512f)*y, 0)));
+					ray.Direction = Vector3.Normalize ((ray.Origin - new Vector3(Camera.Screen.p2.X + (2f/512f)*x, Camera.Screen.p2.Y - (2f/512f)*y, 0)));
 					colors[x,y] = Trace(ray);
 					if(y == 127)
 					{
@@ -52,7 +52,7 @@ namespace Template
 		Vector3 Trace(Ray ray)
 		{
 			Intersection intersect = Scene.NearestIntersect(ray);
-			if (intersect != null)
+			if (intersect != null)				
 				return intersect.Primitive.Color;
 			else
 				return new Vector3(0,0,0);
@@ -115,10 +115,10 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			Primitives.Add(new Plane(new Vector3(0f,0f,6f), new Vector3(0,1,0), new Vector3(1,1,1)));
-			Primitives.Add(new Sphere(new Vector3(-3f, -2f,6f), 1.5f, new Vector3(1,0,0)));
-			Primitives.Add(new Sphere(new Vector3(0f, -2f, 6f), 1.5f, new Vector3(0,1,0)));
-			Primitives.Add(new Sphere(new Vector3(3f, -2f, 6f), 1.5f, new Vector3(0,0,1)));
+			Primitives.Add(new Plane(new Vector3(0f, -10f, 0f), new Vector3(0,1,0), new Vector3(1,1,1)));
+			Primitives.Add(new Sphere(new Vector3(-3f, 0f,6f), 1.5f, new Vector3(1,0,0)));
+			Primitives.Add(new Sphere(new Vector3(0f, 0f, 5f), 1.5f, new Vector3(0,1,0)));
+			Primitives.Add(new Sphere(new Vector3(3f, 0f, 4f), 1.5f, new Vector3(0,0,1)));
 		}
 
 		public Intersection NearestIntersect(Ray ray)
@@ -133,9 +133,11 @@ namespace Template
 					{
 						if (temp.Distance < ray.Distance)
 						{
-							result = temp;
 							if (temp.Distance != 0)
+							{
+								result = temp;
 								ray.Distance = result.Distance;
+							}
 						}
 					}
 					else

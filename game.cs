@@ -29,8 +29,8 @@ namespace Template {
 			for(int x = 0; x < 512; x += 10)
 			{
 				Ray ray = raytracer.rays[x];
-				Vector3 point2 = ray.Direction * Math.Min( ray.Distance, 20);
-				screen2.Line(256, 512, (int)(point2.X * 255) + 256, 512 - (int)(point2.Y  * 255), RGB(1, 1, 1));
+				Vector3 point2 = - (ray.Direction * Math.Min( ray.Distance, 20));
+				screen2.Line(256, 512, (int)(point2.X * 51.2) + 256,  (int)(point2.Y  * 51.2), RGB(1, 1, 1));
 			}
 			List<Primitive> primitives = raytracer.Scene.Primitives;
 			foreach(Primitive primitive in primitives)
