@@ -138,6 +138,19 @@ namespace Template
 				pixels[dest + x] = c;
 			}
 		}
+
+		public void Circle(int x1, int y1, int radius, int c)
+		{
+			
+			for(float x = 0 - radius/2; x < radius; x++)
+				for(float y = 0 - radius/2; y < radius; y++)
+				{
+					if (x * x + y * y - radius < 0.1)
+					{
+						Plot((int) (x1 + x), (int)(y1 + y), c);
+					}						
+				}
+		}
         // helper function for line clipping
         int OUTCODE( int x, int y) 
         {
