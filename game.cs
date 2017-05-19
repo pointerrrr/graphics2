@@ -42,11 +42,14 @@ namespace Template {
 				point2 = ( ray.Direction * Math.Min(ray.Distance, 100) ) + ray.Origin;
 				screen2.Line(TX(ray.Origin.X), TY(ray.Origin.Z), ( TX(point2.X) ), ( TY(point2.Z) ), RGB(1, 1, 1));
 
-				Ray shadowRay = raytracer.shadowrays[x];
-				if (shadowRay != null)
+				for (int i = 0; i < raytracer.shadowrays.Count; i += 10)
 				{
-					Vector3 point2S = (shadowRay.Direction * Math.Min(shadowRay.Distance, 100)) + shadowRay.Origin;
-					screen2.Line((TX(point2S.X)), (TY(point2S.Z)), TX(shadowRay.Origin.X), TY(shadowRay.Origin.Z), RGB(1, 0, 0));
+					Ray shadowRay = raytracer.shadowrays[i];
+					if (shadowRay != null)
+					{
+						Vector3 point2S = ( shadowRay.Direction * Math.Min(shadowRay.Distance, 100) ) + shadowRay.Origin;
+						screen2.Line(( TX(point2S.X) ), ( TY(point2S.Z) ), TX(shadowRay.Origin.X), TY(shadowRay.Origin.Z), RGB(1, 0, 0));
+					}
 				}
 			}
 			List<Primitive> primitives = raytracer.Scene.Primitives;

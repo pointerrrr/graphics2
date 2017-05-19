@@ -60,16 +60,15 @@ namespace Template
 			{
 				return null;
 			}
-
-			xDist -= (float) Math.Sqrt(radiussqr - psqr);
-			
+			xDist -= (float) Math.Sqrt(radiussqr - psqr);			
 			if (xDist > 0)
 			{
-				result.Distance = xDist;
-				result.IntersectionPoint = result.Distance * ray.Direction;
+				result.Distance = xDist - 0.0001f;
+				result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
 				result.IntersectionNormal = Vector3.Normalize(result.IntersectionPoint - Position);
+				return result;
 			}
-			return result;
+			return null;			
 		}
 
 		public override Vector3 GetNormal(Vector3 IntersectionPoint)
@@ -109,7 +108,8 @@ namespace Template
 			Intersection result = new Intersection();
 			result.Primitive = this;
 			Vector3 direction = ray.Direction;
-			float denominator = Vector3.Dot(direction, Normal);
+			float denominator;
+			denominator = Vector3.Dot(direction, Normal);
 			if (Math.Abs(denominator) < 0.0001f)
 				return null;
 			float distance = Vector3.Dot(Position - ray.Origin, Normal) / denominator;
@@ -117,9 +117,9 @@ namespace Template
 			{
 				return null;
 			}
-			result.Distance = distance;
-			result.IntersectionNormal = this.Normal;
-			result.IntersectionPoint = result.Distance * ray.Direction;
+			result.Distance = distance - 0.0001f;
+			result.IntersectionNormal = Normal;
+			result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin - 0.0001f * ray.Direction;
 			return result;
 		}
 
