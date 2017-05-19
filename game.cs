@@ -9,7 +9,15 @@ namespace Template {
 	{
 		// member variables
 		public Surface screen1, screen2;
-			private Raytracer raytracer;
+
+		private Raytracer raytracer;
+		float scaleX = 10.0f;
+		float scaleY = 10.0f;
+		//location of the center
+		float origX = 0.0f, origY = -4f;
+		//current rotation of the square
+
+
 		// initialize
 		public void Init()
 		{
@@ -28,9 +36,11 @@ namespace Template {
 				}
 			for(int x = 0; x < 512; x += 10)
 			{
+				if (x > 40)
+					;
 				Ray ray = raytracer.rays[x];
-				Vector3 point2 = - (ray.Direction * Math.Min( ray.Distance, 20));
-				screen2.Line(256, 512, (int)(point2.X * 51.2) + 256,  (int)(point2.Y  * 51.2), RGB(1, 1, 1));
+				Vector3 point2 =  (ray.Direction * Math.Min( ray.Distance, 100)) + ray.Origin;
+				screen2.Line(256, 512, (TX(point2.X)),  (TY(point2.Z)), RGB(1, 1, 1));
 			}
 			List<Primitive> primitives = raytracer.Scene.Primitives;
 			foreach(Primitive primitive in primitives)
@@ -38,9 +48,28 @@ namespace Template {
 				if (primitive.GetType() == typeof(Sphere))
 				{
 					Sphere temp = (Sphere) primitive;
-					screen2.Circle(256 +(int)(temp.Position.X * 51.2), 512 - (int)(temp.Position.Z * 51.2), (int)(temp.Radius * 51.2) , RGB(temp.Color));
+					screen2.Circle(TX(temp.Position.X), TY(temp.Position.Z), (int)(temp.Radius * 51.2 ), RGB(temp.Color));
 				}
 			}
+		}
+
+		//convert given x value to screen coordinates
+		public int TX(float x)
+		{
+			x += origX;
+			x += scaleX / 2;
+			x *= screen2.width / scaleX;
+			return (int) x;
+		}
+
+		//convert given y value to screen coordinates
+		public int TY(float y)
+		{
+			y += origY;
+			y += scaleY / 2;
+			y *= screen2.height / scaleY;
+			y = screen2.height - y;
+			return (int) y;
 		}
 
 		int RGB (float r, float g, float b)

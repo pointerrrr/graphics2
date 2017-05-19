@@ -145,7 +145,7 @@ namespace Template
 			for(float x = 0 - radius; x < radius; x++)
 				for(float y = 0 - radius; y < radius; y++)
 				{
-					if ((x * x) + (y * y) < radius * radius )
+					if ((x * x) + (y * y) < radius * radius && ( x * x ) + ( y * y ) > (radius - 2) * (radius - 2))
 					{
 						int xtemp = (int)(x1 + x);
 						int ytemp = (int)(y1 + y);
