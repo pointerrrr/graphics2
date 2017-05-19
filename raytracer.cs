@@ -35,13 +35,13 @@ namespace Template
 		void DoRayNStuff()
 		{
 			Ray ray;
-			for(int x = 0; x < 512; x++)
-				for(int y = 0; y < 512; y++)
+			for (int x = 0; x < 512; x++)
+				for (int y = 0; y < 512; y++)
 				{
 					ray = new Ray();
 					ray.Origin = Camera.Position;
-					ray.Direction = Vector3.Normalize(( new Vector3(Camera.Screen.p2.X + ( 2f / 512f ) * x, Camera.Screen.p2.Y - ( 2f / 512f ) * y, 0) - ray.Origin ));
-					colors[x, y] = Trace(ray, y);
+					ray.Direction = Vector3.Normalize(new Vector3(Camera.Screen.p2.X + (2f / 512f) * x, Camera.Screen.p2.Y - (2f / 512f) * y, 0) - ray.Origin);
+					colors[x, y] = Trace(ray);
 					if (y == 256)
 					{
 						rays[x] = ray;
@@ -49,21 +49,38 @@ namespace Template
 				}
 		}
 
-		Vector3 Trace(Ray ray, int y = 0)
+		Vector3 Trace(Ray ray)
 		{
 			Intersection intersect = Scene.NearestIntersect(ray);
 			if (intersect != null)
 			{
-				Vector3 illumination = Illumination(intersect);
+				Vector3 illumination = Illumination(intersect, intersect.Primitive.GetNormal(intersect.IntersectionPoint));
 				return intersect.Primitive.Color * illumination;
 			}
 			else
 				return new Vector3(0, 0, 0);
 		}
 
-		Vector3 Illumination(Intersection intersection, bool saveshadow = false, int shadowsnr = 0)
+		Vector3 Illumination(Intersection intersection, Vector3 N, bool saveshadow = false, int shadowsnr = 0)
 		{
-			Vector3 shadows = new Vector3(0,0,0);
+			Vector3 shadows = new Vector3(0, 0, 0);
+
+			for (int i = 0; i < Scene.LightSources.Count; i++)
+			{
+				Vector3 I = intersection.IntersectionPoint;
+				Vector3 L = Scene.LightSources[i].Position - I;
+				float dist = L.Length;
+				L /= dist;
+
+				if (Scene.FirstIntersect(new Ray { Origin = I, Direction = L, Distance = dist }) != null)
+					return shadows;
+				else
+				{
+					float attenuation = 1 / (dist * dist);
+					shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
+				}
+			}
+			/*Vector3 shadows = new Vector3(0,0,0);
 			for(int i = 0; i < Scene.LightSources.Count; i++)
 			{
 				Ray shadowray = new Ray();
@@ -75,25 +92,26 @@ namespace Template
 						;
 					else
 						shadows += Scene.LightSources[i].Intensity / ( shadowray.Distance * shadowray.Distance ) * Vector3.Dot(intersection.IntersectionNormal,  shadowray.Direction);
-				}
-				/* (saveshadow)
-					shadowrays[shadowsnr] = shadowray;*/
-/*
-				Vector3 I = intersection.IntersectionPoint;
-				Vector3 N = intersection.IntersectionNormal;
-				Vector3 L = Scene.LightSources[i].Position - I;
-				float dist = L.Length;
-				L *= ( 1.0f / dist );
-				if (Scene.FirstIntersect(new Ray { Origin = I, Direction = L, Distance = dist}) != null) ;
-
-				else
-				{
-
-					float attenuation = 1 / ( dist * dist );
-					shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
 				}*/
-				
-			}
+
+			/* (saveshadow)
+				shadowrays[shadowsnr] = shadowray;*/
+			/*
+							Vector3 I = intersection.IntersectionPoint;
+							Vector3 N = intersection.IntersectionNormal;
+							Vector3 L = Scene.LightSources[i].Position - I;
+							float dist = L.Length;
+							L *= ( 1.0f / dist );
+							if (Scene.FirstIntersect(new Ray { Origin = I, Direction = L, Distance = dist}) != null) ;
+
+							else
+							{
+
+								float attenuation = 1 / ( dist * dist );
+								shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
+							}*/
+
+
 			return shadows;
 		}
 	}

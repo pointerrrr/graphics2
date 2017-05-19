@@ -16,6 +16,11 @@ namespace Template
 		{
 			return null;
 		}
+
+		public virtual Vector3 GetNormal(Vector3 IntersectionPoint)
+		{
+			return new Vector3(0,0,0);
+		}
 	}
 
 	public class Sphere : Primitive
@@ -66,6 +71,13 @@ namespace Template
 			}
 			return result;
 		}
+
+		public override Vector3 GetNormal(Vector3 IntersectionPoint)
+		{
+			Vector3 normal;
+			normal = new Vector3(Vector3.Normalize(IntersectionPoint - Position));
+			return normal;
+		}
 	}
 
 	public class Plane : Primitive
@@ -111,5 +123,9 @@ namespace Template
 			return result;
 		}
 
+		public override Vector3 GetNormal(Vector3 IntersectionPoint)
+		{
+			return Normal;
+		}
 	}
 }
