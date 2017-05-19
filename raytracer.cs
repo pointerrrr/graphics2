@@ -18,7 +18,7 @@ namespace Template
 		public Scene Scene { get; set; }
 		public Camera Camera { get; set; }
 		public Vector3[,] colors = new Vector3[512, 512];
-		public Ray[] rays = new Ray[512];
+		public Ray[] rays = new Ray[512], shadowrays = new Ray[512];
 
 		public Raytracer()
 		{
@@ -41,7 +41,7 @@ namespace Template
 					ray = new Ray();
 					ray.Origin = Camera.Position;
 					ray.Direction = Vector3.Normalize(( new Vector3(Camera.Screen.p2.X + ( 2f / 512f ) * x, Camera.Screen.p2.Y - ( 2f / 512f ) * y, 0) - ray.Origin ));
-					colors[x, y] = Trace(ray);
+					colors[x, y] = Trace(ray, y);
 					if (y == 256)
 					{
 						rays[x] = ray;
@@ -49,13 +49,52 @@ namespace Template
 				}
 		}
 
-		Vector3 Trace(Ray ray)
+		Vector3 Trace(Ray ray, int y = 0)
 		{
 			Intersection intersect = Scene.NearestIntersect(ray);
-			if (intersect != null)				
-				return intersect.Primitive.Color;
+			if (intersect != null)
+			{
+				Vector3 illumination = Illumination(intersect);
+				return intersect.Primitive.Color * illumination;
+			}
 			else
-				return new Vector3(0,0,0);
+				return new Vector3(0, 0, 0);
+		}
+
+		Vector3 Illumination(Intersection intersection, bool saveshadow = false, int shadowsnr = 0)
+		{
+			Vector3 shadows = new Vector3(0,0,0);
+			for(int i = 0; i < Scene.LightSources.Count; i++)
+			{
+				Ray shadowray = new Ray();
+				shadowray.Distance = (Scene.LightSources[i].Position - intersection.IntersectionPoint).Length;
+				shadowray.Direction = Vector3.Normalize(Scene.LightSources[i].Position - intersection.IntersectionPoint);
+				shadowray.Origin = intersection.IntersectionPoint + shadowray.Direction * 0.0001f;
+				if (Scene.FirstIntersect(shadowray) == null)
+				{ if (shadowray.Distance < 0 || shadowray.Distance > ( Scene.LightSources[i].Position - intersection.IntersectionPoint ).Length)
+						;
+					else
+						shadows += Scene.LightSources[i].Intensity / ( shadowray.Distance * shadowray.Distance ) * Vector3.Dot(intersection.IntersectionNormal,  shadowray.Direction);
+				}
+				/* (saveshadow)
+					shadowrays[shadowsnr] = shadowray;*/
+/*
+				Vector3 I = intersection.IntersectionPoint;
+				Vector3 N = intersection.IntersectionNormal;
+				Vector3 L = Scene.LightSources[i].Position - I;
+				float dist = L.Length;
+				L *= ( 1.0f / dist );
+				if (Scene.FirstIntersect(new Ray { Origin = I, Direction = L, Distance = dist}) != null) ;
+
+				else
+				{
+
+					float attenuation = 1 / ( dist * dist );
+					shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
+				}*/
+				
+			}
+			return shadows;
 		}
 	}
 
@@ -115,6 +154,8 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
+			LightSources.Add(new LightSource { Intensity = new Vector3(10,10,10), Position = new Vector3( 0, 0, -2f) });
+			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 10, 10), Position = new Vector3(0, -3, 5f) });
 			Primitives.Add(new Plane(new Vector3(0f,  -2f, 0f), new Vector3(0,1,0), new Vector3(1,1,1)));
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0,0)));
 			Primitives.Add(new Sphere(new Vector3(0f, 0f, 5f), 1.5f, new Vector3(0,1,0)));
@@ -129,26 +170,43 @@ namespace Template
 				Intersection temp = primitive.Intersect(ray);
 				if (temp != null)
 				{
-					if (result != null)
+					if (temp.Distance > 0)
 					{
-						if (temp.Distance < ray.Distance)
+						if (result != null)
 						{
-							if (temp.Distance != 0)
+							if (temp.Distance < ray.Distance)
 							{
 								result = temp;
 								ray.Distance = result.Distance;
+
 							}
 						}
-					}
-					else
-					{
-						result = temp;
-						ray.Distance = temp.Distance;
+						else
+						{
+							result = temp;
+							ray.Distance = temp.Distance;
+						}
 					}
 				}
 
 			}
 			
+			return result;
+		}
+
+		public Intersection FirstIntersect(Ray ray)
+		{
+			Intersection result = null;
+			foreach (Primitive primitive in Primitives)
+			{
+				Intersection temp = primitive.Intersect(ray);
+				if (temp != null)
+				{
+					return temp;
+				}
+
+			}
+
 			return result;
 		}
 	}

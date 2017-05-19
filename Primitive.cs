@@ -51,12 +51,18 @@ namespace Template
 			Vector3 yVector = centerVector - xDist * ray.Direction;
 			float psqr = Vector3.Dot(yVector, yVector);
 			float radiussqr = Radius * Radius;
-			if (psqr > radiussqr) return null;
+			if (psqr > radiussqr)
+			{
+				return null;
+			}
+
 			xDist -= (float) Math.Sqrt(radiussqr - psqr);
 			
 			if (xDist > 0)
 			{
 				result.Distance = xDist;
+				result.IntersectionPoint = result.Distance * ray.Direction;
+				result.IntersectionNormal = Vector3.Normalize(result.IntersectionPoint - Position);
 			}
 			return result;
 		}
@@ -96,8 +102,12 @@ namespace Template
 				return null;
 			float distance = Vector3.Dot(Position - ray.Origin, Normal) / denominator;
 			if (distance < 0)
+			{
 				return null;
+			}
 			result.Distance = distance;
+			result.IntersectionNormal = this.Normal;
+			result.IntersectionPoint = result.Distance * ray.Direction;
 			return result;
 		}
 

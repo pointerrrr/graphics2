@@ -48,7 +48,7 @@ namespace Template {
 				if (primitive.GetType() == typeof(Sphere))
 				{
 					Sphere temp = (Sphere) primitive;
-					screen2.Circle(TX(temp.Position.X), TY(temp.Position.Z), (int)(temp.Radius * 51.2 ), RGB(temp.Color));
+					screen2.Circle(TX(temp.Position.X), TY(temp.Position.Z), (int)(temp.Radius * 51.2 +1 ), RGB(temp.Color));
 				}
 			}
 		}
