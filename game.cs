@@ -14,7 +14,7 @@ namespace Template {
 		float scaleX = 10.0f;
 		float scaleY = 10.0f;
 		//location of the center
-		float origX = 0.0f, origY = -4f;
+		float origX = 0.0f, origY = -3f;
 		//current rotation of the square
 
 
@@ -36,11 +36,11 @@ namespace Template {
 				}
 			for(int x = 0; x < 512; x += 10)
 			{
-				if (x > 40)
-					;
 				Ray ray = raytracer.rays[x];
-				Vector3 point2 =  (ray.Direction * Math.Min( ray.Distance, 100)) + ray.Origin;
-				screen2.Line(256, 512, (TX(point2.X)),  (TY(point2.Z)), RGB(1, 1, 1));
+				Vector3 point2;
+				point2 = ( ray.Direction * Math.Min(ray.Distance, 100) ) + ray.Origin;
+				screen2.Line(TX(ray.Origin.X), TY(ray.Origin.Z), ( TX(point2.X) ), ( TY(point2.Z) ), RGB(1, 1, 1));
+				
 			}
 			List<Primitive> primitives = raytracer.Scene.Primitives;
 			foreach(Primitive primitive in primitives)

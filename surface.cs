@@ -154,8 +154,9 @@ namespace Template
 					}						
 				}
 		}
-        // helper function for line clipping
-        int OUTCODE( int x, int y) 
+
+		// helper function for line clipping
+		int OUTCODE( int x, int y) 
         {
             int xmin = 0, ymin = 0, xmax = width - 1, ymax = height - 1;
             return (((x) < xmin) ? 1 : (((x) > xmax) ? 2 : 0)) + (((y) < ymin) ? 4 : (((y) > ymax) ? 8 : 0));
@@ -209,6 +210,7 @@ namespace Template
 				}
 			}
 		}
+
         // plot a single pixel
 		public void Plot( int x, int y, int c )
 		{
