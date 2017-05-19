@@ -41,7 +41,7 @@ namespace Template
 					ray = new Ray();
 					ray.Origin = Camera.Position;
 					ray.Direction = Vector3.Normalize(new Vector3(Camera.Screen.p2.X + (2f / 512f) * x, Camera.Screen.p2.Y - (2f / 512f) * y, 0) - ray.Origin);
-					colors[x, y] = Trace(ray);
+					colors[x, y] = Trace(ray, x, y);
 					if (y == 256)
 					{
 						rays[x] = ray;
@@ -49,19 +49,19 @@ namespace Template
 				}
 		}
 
-		Vector3 Trace(Ray ray)
+		Vector3 Trace(Ray ray, int x, int y)
 		{
 			Intersection intersect = Scene.NearestIntersect(ray);
 			if (intersect != null)
 			{
-				Vector3 illumination = Illumination(intersect, intersect.Primitive.GetNormal(intersect.IntersectionPoint));
+				Vector3 illumination = Illumination(intersect, intersect.Primitive.GetNormal(intersect.IntersectionPoint), x, y == 256);
 				return intersect.Primitive.Color * illumination;
 			}
 			else
 				return new Vector3(0, 0, 0);
 		}
 
-		Vector3 Illumination(Intersection intersection, Vector3 N, bool saveshadow = false, int shadowsnr = 0)
+		Vector3 Illumination(Intersection intersection, Vector3 N, int x, bool saveshadow, int shadowsnr = 0)
 		{
 			Vector3 shadows = new Vector3(0, 0, 0);
 
@@ -72,7 +72,11 @@ namespace Template
 				float dist = L.Length;
 				L /= dist;
 
-				if (Scene.FirstIntersect(new Ray { Origin = I, Direction = L, Distance = dist }) != null)
+				Ray shadowRay = new Ray { Origin = I, Direction = L, Distance = dist };
+				if (saveshadow)
+					shadowrays[x] = shadowRay;
+
+				if (Scene.FirstIntersect(shadowRay) != null)
 					return shadows;
 				else
 				{
@@ -172,8 +176,8 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			LightSources.Add(new LightSource { Intensity = new Vector3(10,10,10), Position = new Vector3( 0, 0, -2f) });
-			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 10, 10), Position = new Vector3(0, -3, 5f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10,10,10), Position = new Vector3( 0, 0, 2f) });
+			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 10, 10), Position = new Vector3(2, 0, -1f) });
 			Primitives.Add(new Plane(new Vector3(0f,  -2f, 0f), new Vector3(0,1,0), new Vector3(1,1,1)));
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0,0)));
 			Primitives.Add(new Sphere(new Vector3(0f, 0f, 5f), 1.5f, new Vector3(0,1,0)));
