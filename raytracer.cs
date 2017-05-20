@@ -77,15 +77,20 @@ namespace Template
 				if (Vector3.Dot(N, L) > 0)
 				{
 					Ray shadowRay = new Ray { Origin = I, Direction = L, Distance = dist };
-					if (saveshadow)
-						shadowrays.Add(shadowRay);
 
 
-					if (Scene.FirstIntersect(shadowRay) == null)
+					Intersection result = Scene.FirstIntersect(shadowRay);
+					if (result == null)
 					{
 						float attenuation = 1 / ( dist * dist );
 						shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
 					}
+					else
+					{
+						shadowRay.Distance = result.Distance;
+					}
+					if (saveshadow)
+						shadowrays.Add(shadowRay);
 				}
 			}
 			return shadows;
@@ -170,7 +175,7 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			LightSources.Add(new LightSource { Intensity = new Vector3(7f,7f,8f), Position = new Vector3( -0.5f, 1.5f, -1f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(7f,7f,8f), Position = new Vector3( -1f, 1.5f, -1f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
