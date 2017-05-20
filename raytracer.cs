@@ -23,7 +23,8 @@ namespace Template
 		public Raytracer()
 		{
 			Scene = new Scene();
-			Camera = new Camera();
+			//Camera = new Camera();
+			Camera = new Camera(new Vector3(0f, 0f, -1f), new Vector3(0f, 0f, 1f));
 			DoRayNStuff();
 		}
 
@@ -40,7 +41,7 @@ namespace Template
 				{
 					ray = new Ray();
 					ray.Origin = Camera.Position;
-					ray.Direction = Vector3.Normalize(new Vector3(Camera.Screen.p2.X + (2f / 512f) * x, Camera.Screen.p2.Y - (2f / 512f) * y, 0) - ray.Origin);
+					ray.Direction = Vector3.Normalize(new Vector3(Camera.Screen.p2.X + (2f / 512f) * x, Camera.Screen.p2.Y - (2f / 512f) * y, Camera.Screen.p2.Z) - ray.Origin);
 					colors[x, y] = Trace(ray, x, y);
 					if (y == 256)
 					{
@@ -96,6 +97,7 @@ namespace Template
 		public Vector3 Position { get; set; }
 		public Vector3 Direction { get; set; }
 		public Screen Screen;
+		public float ScreenDistance;
 
 		public Camera()
 		{
@@ -110,16 +112,37 @@ namespace Template
 
 		}
 
-		public Camera(Vector3 position, Vector3 direction)
+		public Camera(Vector3 position, Vector3 direction, float screenDistance = 1)
 		{
 			Position = position;
 			Direction = direction;
+			ScreenDistance = screenDistance;
+
+			Screen = new Screen
+			{
+				PosX1 = Position.X - 1,
+				PosX2 = Position.X + 1,
+				PosY1 = Position.Y - 1,
+				PosY2 = Position.Y + 1,
+				PosZ1 = Position.Z,
+				PosZ2 = Position.Z
+
+				/*p0 = new Vector3(Position.X - 1, Position.Y -1, Position.Z + 1),
+				p1 = new Vector3(Position.X + 1, Position.Y -1, Position.Z + 1),
+				p2 = new Vector3(Position.X - 1, Position.Y + 1, Position.Z + 1),
+				p3 = new Vector3(Position.X + 1, Position.Y + 1, Position.Z + 1)*/
+			};
+			Screen.p0 = new Vector3(Screen.PosX1, Screen.PosY1, Screen.PosZ1) + ScreenDistance * Direction;
+			Screen.p1 = new Vector3(Screen.PosX2, Screen.PosY1, Screen.PosZ2) + ScreenDistance * Direction;
+			Screen.p2 = new Vector3(Screen.PosX1, Screen.PosY2, Screen.PosZ1) + ScreenDistance * Direction;
+			Screen.p3 = new Vector3(Screen.PosX2, Screen.PosY2, Screen.PosZ2) + ScreenDistance * Direction;
 		}
 	}
 
 	public class Screen
 	{
 		public Vector3 p0, p1, p2, p3;
+		public float PosX1, PosX2, PosY1, PosY2, PosZ1, PosZ2;
 	}
 
 
@@ -147,14 +170,14 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			LightSources.Add(new LightSource { Intensity = new Vector3(100f,100f,100f), Position = new Vector3( 0, 2, 0f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(7f,7f,8f), Position = new Vector3( -0.5f, 1.5f, -1f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
-			Primitives.Add(new Plane(new Vector3(0f,  -2f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1,1,1)));
+			Primitives.Add(new Plane(new Vector3(0f,  -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1,1,1)));
 			//Primitives.Add(new Plane(new Vector3(0f, 0f, 7f), new Vector3(0f, 0f, -1f), new Vector3(1, 0, 1)));
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
-			Primitives.Add(new Sphere(new Vector3(0f, 0f, 5f), 1.5f, new Vector3(0.1f,1,0.1f)));
+			Primitives.Add(new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f,1,0.1f)));
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(0.1f,0.1f,1)));
 		}
 
