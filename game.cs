@@ -22,7 +22,6 @@ namespace Template {
 		public void Init()
 		{
 			raytracer = new Raytracer();
-			
 		}
 
 		// tick: renders one frame
@@ -34,6 +33,7 @@ namespace Template {
 					Vector3 color = raytracer.colors[x, y];
 					screen1.Plot(x, y, RGB(color.X, color.Y, color.Z));
 				}
+
 			for(int x = 0; x < 512; x += 10)
 			{
 				Ray ray = raytracer.rays[x];
@@ -52,6 +52,7 @@ namespace Template {
 					}
 				}
 			}
+
 			List<Primitive> primitives = raytracer.Scene.Primitives;
 			foreach(Primitive primitive in primitives)
 			{
@@ -61,6 +62,7 @@ namespace Template {
 					screen2.Circle(TX(temp.Position.X), TY(temp.Position.Z), (int)(temp.Radius * 51.2 +1 ), RGB(temp.Color));
 				}
 			}
+
 			Screen traceScreen = raytracer.Camera.Screen;
 			int x11 = TX(traceScreen.p2.X);
 			int y11 = TY(traceScreen.p2.Z);
@@ -106,6 +108,5 @@ namespace Template {
 			int bint = (int) ( Math.Min(1, color.Z) * 255 );
 			return ( rint << 16 ) + ( gint << 8 ) + ( bint );
 		}
-	}
-
+	} // class Game
 } // namespace Template
