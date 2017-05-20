@@ -61,6 +61,15 @@ namespace Template {
 					screen2.Circle(TX(temp.Position.X), TY(temp.Position.Z), (int)(temp.Radius * 51.2 +1 ), RGB(temp.Color));
 				}
 			}
+			Screen traceScreen = raytracer.Camera.Screen;
+			int x11 = TX(traceScreen.p2.X);
+			int y11 = TY(traceScreen.p2.Z);
+			int x12 = TX(traceScreen.p3.X);
+			int y12 = TY(traceScreen.p3.Z);
+
+			screen2.Line(x11, y11 - 1, x12, y12 - 1, RGB(1, 0, 1));
+			screen2.Line(x11, y11, x12, y12, RGB(1, 0, 1));
+			screen2.Line(x11, y11 + 1, x12, y12 + 1, RGB(1, 0, 1));
 		}
 
 		//convert given x value to screen coordinates
