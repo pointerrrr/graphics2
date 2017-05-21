@@ -87,52 +87,52 @@ namespace Template {
 			if (NewKeyPress(Key.Up))
 			{
 				raytracer.smoothdraw = false;
-				//Move(0, 1f);
+				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction + new Vector3(0, raytracer.Camera.Direction.Z, -raytracer.Camera.Direction.X) * ( (float) Math.PI / 180 ));
 			}
 			if (NewKeyPress(Key.Down))
 			{
 				raytracer.smoothdraw = false;
-				//Move(0, -1f);
+				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction - new Vector3(0, raytracer.Camera.Direction.Z, -raytracer.Camera.Direction.X) * ( (float) Math.PI / 180 ));
 			}
 			if (NewKeyPress(Key.Left))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction + (Vector3.Cross(raytracer.Camera.Direction, new Vector3(0, 1, 0))) * ((float)Math.PI/180));
+				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction - new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * ( (float) Math.PI / 180 ));
 			}
 			if (NewKeyPress(Key.Right))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction - ( Vector3.Cross(raytracer.Camera.Direction, new Vector3(0, 1, 0)) ) * ( (float) Math.PI / 180 ));
+				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction + new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * ( (float) Math.PI / 180 ));
 			}
 			if (NewKeyPress(Key.W))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Position += new Vector3(0, 0, 0.1f);
+				raytracer.Camera.Position +=  new Vector3(raytracer.Camera.Direction.X, 0, raytracer.Camera.Direction.Z) * 0.1f;
 			}
 			if (NewKeyPress(Key.S))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Position += new Vector3(0, 0, -0.1f);
+				raytracer.Camera.Position -= new Vector3(raytracer.Camera.Direction.X, 0, raytracer.Camera.Direction.Z) * 0.1f;
 			}
 			if (NewKeyPress(Key.A))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Position += new Vector3(-0.1f, 0, 0f);
+				raytracer.Camera.Position -= new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * 0.1f;
 			}
 			if (NewKeyPress(Key.D))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Position += new Vector3(0.1f, 0, 0f);
+				raytracer.Camera.Position += new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * 0.1f;
 			}
 			if (NewKeyPress(Key.Z))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Position += new Vector3(0f, 0.1f, 0f);
+				raytracer.Camera.Position += new Vector3(0f, -0.1f, 0f);
 			}
 			if (NewKeyPress(Key.X))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Position += new Vector3(0f, -0.1f, 0f);
+				raytracer.Camera.Position += new Vector3(0f, 0.1f, 0f);
 			}
 			if (NewKeyPress(Key.Space))
 			{
