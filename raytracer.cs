@@ -115,7 +115,7 @@ namespace Template
 						Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x ) / 256 ) + yscreen * ( ( y ) / 256 );
 
 						ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-						colors1[(int) x, (int) y] = Trace(ray, (int) x, (int) y);
+						colors1[(int) x, (int) y] = Trace(ray);
 
 					}
 					else if (smoothdraw && doaa)
@@ -134,7 +134,7 @@ namespace Template
 								Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x + i / aasqrt ) / 256 ) + yscreen * ( ( y + j / aasqrt ) / 256 );
 
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-								avg[(int)i,(int)j] = Trace(ray, (int) x, (int) y);
+								avg[(int)i,(int)j] = Trace(ray);
 							}
 						}
 						Vector3 final = new Vector3(0,0,0);
@@ -168,7 +168,7 @@ namespace Template
 						Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x + 256 ) / 256 ) + yscreen * ( ( y ) / 256 );
 
 						ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-						colors2[(int) x, (int) y] = Trace(ray, (int) x, (int) y);
+						colors2[(int) x, (int) y] = Trace(ray);
 						
 					}
 					else if (smoothdraw && doaa)
@@ -187,7 +187,7 @@ namespace Template
 								Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x + 256 + i / aasqrt ) / 256 ) + yscreen * ( ( y + j / aasqrt ) / 256 );
 
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-								avg[(int) i, (int) j] = Trace(ray, (int) x, (int) y);
+								avg[(int) i, (int) j] = Trace(ray);
 							}
 						}
 						Vector3 final = new Vector3(0, 0, 0);
@@ -224,10 +224,10 @@ namespace Template
 						if (y == 0)
 						{
 							rays1.Add(ray);
-							colors3[(int) x, (int) y] = Trace(ray, (int) x, (int) 257);
+							colors3[(int) x, (int) y] = Trace(ray, 1);
 						}
 						else
-							colors3[(int) x, (int) y] = Trace(ray, (int) x, (int) y);
+							colors3[(int) x, (int) y] = Trace(ray);
 					}
 					else if(smoothdraw && doaa)
 					{
@@ -245,7 +245,7 @@ namespace Template
 								Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x + i / aasqrt ) / 256 ) + yscreen * ( ( y + 256 + j / aasqrt ) / 256 );
 
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-								avg[(int) i, (int) j] = Trace(ray, (int) x, (int) y);
+								avg[(int) i, (int) j] = Trace(ray, (y == 0 && i == 0 && j == 0) ? 1 : 0);
 								if (i == 0 && j == 0 && y == 0)
 									rays1.Add(ray);
 							}
@@ -285,10 +285,10 @@ namespace Template
 						if (y == 0)
 						{
 							rays2.Add(ray);
-							colors4[(int) x, (int) y] = Trace(ray, (int) x, (int) 256);
+							colors4[(int) x, (int) y] = Trace(ray, 2);
 						}
 						else
-							colors4[(int) x, (int) y] = Trace(ray, (int) x, (int) y);
+							colors4[(int) x, (int) y] = Trace(ray);
 					}
 					else if (smoothdraw && doaa)
 					{
@@ -306,7 +306,7 @@ namespace Template
 								Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x + 256 + i / aasqrt ) / 256 ) + yscreen * ( ( y + 256 + j / aasqrt ) / 256 );
 
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-								avg[(int) i, (int) j] = Trace(ray, (int) x, (int) y);
+								avg[(int) i, (int) j] = Trace(ray, ( y == 0 && i == 0 && j == 0 ) ? 2 : 0);
 								if (i == 0 && j == 0 && y == 0)
 									rays2.Add(ray);
 							}
@@ -326,19 +326,19 @@ namespace Template
 
 		}
 
-		Vector3 Trace(Ray ray, int x, int y)
+		Vector3 Trace(Ray ray, int shadow = 0)
 		{
 			Intersection intersect = Scene.NearestIntersect(ray);
 			if (intersect != null)
 			{
-				Vector3 illumination = Illumination(intersect, x, y);
+				Vector3 illumination = Illumination(intersect, shadow);
 				return intersect.Primitive.Color * illumination;
 			}
 			else
 				return new Vector3(0, 0, 0);
 		}
 
-		Vector3 Illumination(Intersection intersection, int x, int saveshadow)
+		Vector3 Illumination(Intersection intersection, int shadow = 0)
 		{
 			Vector3 shadows = new Vector3(0, 0, 0);
 			
@@ -365,9 +365,9 @@ namespace Template
 					{
 						shadowRay.Distance = result.Distance;
 					}
-					if (saveshadow == 256)
+					if (shadow == 1)
 						shadowrays1.Add(shadowRay);
-					if (saveshadow == 257)
+					if (shadow == 2)
 						shadowrays2.Add(shadowRay);
 				}
 			}
@@ -412,8 +412,10 @@ namespace Template
 		void CreateScreen()
 		{
 			Screen = new Screen();
-			Vector3 perp = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(0,1,0)));
+			Vector3 perp = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(0,1,0)));			
 			Vector3 perpz = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(1,0,0)));
+			if (perpz.Y < 0)
+				perpz = -perpz;
 			Screen.p0 = Position + Direction * ScreenDistance + perp + perpz;
 			Screen.p1 = Position + Direction * ScreenDistance - perp + perpz;
 			Screen.p2 = Position + Direction * ScreenDistance + perp - perpz;
