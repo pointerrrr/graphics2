@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using OpenTK;
+using OpenTK.Input;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Template {
 
@@ -11,6 +13,7 @@ namespace Template {
 		public Surface screen1, screen2;
 
 		private Raytracer raytracer;
+		private KeyboardState prevKeyState, currentKeyState;
 		float scaleX = 10.0f;
 		float scaleY = 10.0f;
 		//location of the center
@@ -24,31 +27,37 @@ namespace Template {
 			raytracer = new Raytracer();
 			
 		}
-
 		// tick: renders one frame
 		public void Tick()
 		{
+			raytracer.Camera.Update();
+			raytracer.Render();
 			for (int x = 0; x < 512; x++)
 				for (int y = 0; y < 512; y++)
 				{
 					Vector3 color = raytracer.colors[x, y];
 					screen1.Plot(x, y, RGB(color.X, color.Y, color.Z));
 				}
+			screen2.Clear(0x0);
+			
 			for(int x = 0; x < 512; x += 10)
 			{
-				Ray ray = raytracer.rays[x];
-				
-				Vector3 point2;
-				point2 = ( ray.Direction * Math.Min(ray.Distance, 100) ) + ray.Origin;
-				screen2.Line(TX(ray.Origin.X), TY(ray.Origin.Z), ( TX(point2.X) ), ( TY(point2.Z) ), RGB(1, 1, 1));
-
-				for (int i = 0; i < raytracer.shadowrays.Count; i += 10)
+				if (raytracer.rays.Count > x)
 				{
-					Ray shadowRay = raytracer.shadowrays[i];
-					if (shadowRay != null)
+					Ray ray = raytracer.rays[x];
+
+					Vector3 point2;
+					point2 = ( ray.Direction * Math.Min(ray.Distance, 100) ) + ray.Origin;
+					screen2.Line(TX(ray.Origin.X), TY(ray.Origin.Z), ( TX(point2.X) ), ( TY(point2.Z) ), RGB(1, 1, 1));
+
+					for (int i = 0; i < raytracer.shadowrays.Count; i += 10)
 					{
-						Vector3 point2S = ( shadowRay.Direction * Math.Min(shadowRay.Distance, 100) ) + shadowRay.Origin;
-						screen2.Line(( TX(point2S.X) ), ( TY(point2S.Z) ), TX(shadowRay.Origin.X), TY(shadowRay.Origin.Z), RGB(1, 0, 0));
+						Ray shadowRay = raytracer.shadowrays[i];
+						if (shadowRay != null)
+						{
+							Vector3 point2S = ( shadowRay.Direction * Math.Min(shadowRay.Distance, 100) ) + shadowRay.Origin;
+							screen2.Line(( TX(point2S.X) ), ( TY(point2S.Z) ), TX(shadowRay.Origin.X), TY(shadowRay.Origin.Z), RGB(1, 0, 0));
+						}
 					}
 				}
 			}
@@ -70,6 +79,83 @@ namespace Template {
 			screen2.Line(x11, y11 - 1, x12, y12 - 1, RGB(1, 0, 1));
 			screen2.Line(x11, y11, x12, y12, RGB(1, 0, 1));
 			screen2.Line(x11, y11 + 1, x12, y12 + 1, RGB(1, 0, 1));
+		}
+
+		public void Controls(KeyboardState keys)
+		{
+			currentKeyState = keys;
+			if (NewKeyPress(Key.Up))
+			{
+				raytracer.smoothdraw = false;
+				//Move(0, 1f);
+			}
+			if (NewKeyPress(Key.Down))
+			{
+				raytracer.smoothdraw = false;
+				//Move(0, -1f);
+			}
+			if (NewKeyPress(Key.Left))
+			{
+				raytracer.smoothdraw = false;
+				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction + (Vector3.Cross(raytracer.Camera.Direction, new Vector3(0, 1, 0))) * ((float)Math.PI/180));
+			}
+			if (NewKeyPress(Key.Right))
+			{
+				raytracer.smoothdraw = false;
+				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction - ( Vector3.Cross(raytracer.Camera.Direction, new Vector3(0, 1, 0)) ) * ( (float) Math.PI / 180 ));
+			}
+			if (NewKeyPress(Key.W))
+			{
+				raytracer.smoothdraw = false;
+				raytracer.Camera.Position += new Vector3(0, 0, 0.1f);
+			}
+			if (NewKeyPress(Key.S))
+			{
+				raytracer.smoothdraw = false;
+				raytracer.Camera.Position += new Vector3(0, 0, -0.1f);
+			}
+			if (NewKeyPress(Key.A))
+			{
+				raytracer.smoothdraw = false;
+				raytracer.Camera.Position += new Vector3(-0.1f, 0, 0f);
+			}
+			if (NewKeyPress(Key.D))
+			{
+				raytracer.smoothdraw = false;
+				raytracer.Camera.Position += new Vector3(0.1f, 0, 0f);
+			}
+			if (NewKeyPress(Key.Z))
+			{
+				raytracer.smoothdraw = false;
+				raytracer.Camera.Position += new Vector3(0f, 0.1f, 0f);
+			}
+			if (NewKeyPress(Key.X))
+			{
+				raytracer.smoothdraw = false;
+				raytracer.Camera.Position += new Vector3(0f, -0.1f, 0f);
+			}
+			if (NewKeyPress(Key.Space))
+			{
+				raytracer.smoothdraw = true;
+			}
+		}
+
+		public float rotateX(float x, float y, float a)
+		{
+			float rx = (float) ( x * Math.Cos(a) - y * Math.Sin(a) );
+			return rx;
+		}
+
+		//returns the rotated y value of the given point a degrees
+		public float rotateY(float x, float y, float a)
+		{
+			float ry = (float) ( x * Math.Sin(a) + y * Math.Cos(a) );
+			return ry;
+		}
+
+		public bool NewKeyPress(Key key)
+		{
+			return ( currentKeyState[key] && ( currentKeyState[key] != prevKeyState[key] ) );
 		}
 
 		//convert given x value to screen coordinates
