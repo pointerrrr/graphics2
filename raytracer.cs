@@ -23,7 +23,7 @@ namespace Template
 		public bool smoothdraw = true;
 		int recursion = 4, antialiasing;
 		float aasqrt;
-		bool doaa = false;
+		bool doaa = true;
 
 		public int Antialiasing
 		{
@@ -246,6 +246,8 @@ namespace Template
 
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
 								avg[(int) i, (int) j] = Trace(ray, (int) x, (int) y);
+								if (i == 0 && j == 0 && y == 0)
+									rays1.Add(ray);
 							}
 						}
 						Vector3 final = new Vector3(0, 0, 0);
@@ -305,6 +307,8 @@ namespace Template
 
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
 								avg[(int) i, (int) j] = Trace(ray, (int) x, (int) y);
+								if (i == 0 && j == 0 && y == 0)
+									rays2.Add(ray);
 							}
 						}
 						Vector3 final = new Vector3(0, 0, 0);
@@ -448,7 +452,7 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			LightSources.Add(new LightSource { Intensity = new Vector3(7f,7f,8f), Position = new Vector3( -1f,1.5f, -1f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(7f,7f,8f), Position = new Vector3( -1f, 0f, -1f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
