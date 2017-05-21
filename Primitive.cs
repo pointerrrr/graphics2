@@ -21,7 +21,7 @@ namespace Template
 		{
 			return new Vector3(0,0,0);
 		}
-	} // class Primitive
+	}
 
 	public class Sphere : Primitive
 	{
@@ -56,10 +56,10 @@ namespace Template
 			Vector3 yVector = centerVector - xDist * ray.Direction;
 			float psqr = Vector3.Dot(yVector, yVector);
 			float radiussqr = Radius * Radius;
-
 			if (psqr > radiussqr)
+			{
 				return null;
-
+			}
 			xDist -= (float) Math.Sqrt(radiussqr - psqr);			
 			if (xDist > 0)
 			{
@@ -77,7 +77,7 @@ namespace Template
 			normal = new Vector3(Vector3.Normalize(IntersectionPoint - Position));
 			return normal;
 		}
-	} // class Sphere : Primitive
+	}
 
 	public class Plane : Primitive
 	{
@@ -110,14 +110,13 @@ namespace Template
 			Vector3 direction = ray.Direction;
 			float denominator;
 			denominator = Vector3.Dot(direction, Normal);
-
 			if (Math.Abs(denominator) < 0.0001f)
 				return null;
-
 			float distance = Vector3.Dot(Position - ray.Origin, Normal) / denominator;
 			if (distance < 0)
+			{
 				return null;
-
+			}
 			result.Distance = distance - 0.0001f;
 			result.IntersectionNormal = Normal;
 			result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin - 0.0001f * ray.Direction;
@@ -128,5 +127,5 @@ namespace Template
 		{
 			return Normal;
 		}
-	} // class Plane : Primitive
-} // namespace Template
+	}
+}

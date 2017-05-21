@@ -23,6 +23,7 @@ namespace Template
 		public Raytracer()
 		{
 			Scene = new Scene();
+			//Camera = new Camera();
 			Camera = new Camera(new Vector3(0f, 0f, -1f), new Vector3(0f, 0f, 1f));
 			DoRayNStuff();
 		}
@@ -43,7 +44,9 @@ namespace Template
 					ray.Direction = Vector3.Normalize(new Vector3(Camera.Screen.p2.X + (2f / 512f) * x, Camera.Screen.p2.Y - (2f / 512f) * y, Camera.Screen.p2.Z) - ray.Origin);
 					colors[x, y] = Trace(ray, x, y);
 					if (y == 256)
+					{
 						rays.Add( ray);
+					}
 				}
 		}
 
@@ -68,12 +71,13 @@ namespace Template
 				Vector3 I = intersection.IntersectionPoint;
 				Vector3 L = Scene.LightSources[i].Position - I;
 				Vector3 N = intersection.IntersectionNormal;
+				
 				float dist =  L.Length;
 				L /= dist;
-
 				if (Vector3.Dot(N, L) > 0)
 				{
 					Ray shadowRay = new Ray { Origin = I, Direction = L, Distance = dist };
+
 
 					Intersection result = Scene.FirstIntersect(shadowRay);
 					if (result == null)
@@ -82,15 +86,16 @@ namespace Template
 						shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
 					}
 					else
+					{
 						shadowRay.Distance = result.Distance;
-
+					}
 					if (saveshadow)
 						shadowrays.Add(shadowRay);
 				}
 			}
 			return shadows;
 		}
-	} // class Raytracer
+	}
 
 	public class Camera
 	{
@@ -124,21 +129,25 @@ namespace Template
 				PosX2 = Position.X + 1,
 				PosY1 = Position.Y - 1,
 				PosY2 = Position.Y + 1,
-				PosZ = Position.Z
+				PosZ1 = Position.Z,
+				PosZ2 = Position.Z
 
+				/*p0 = new Vector3(Position.X - 1, Position.Y -1, Position.Z + 1),
+				p1 = new Vector3(Position.X + 1, Position.Y -1, Position.Z + 1),
+				p2 = new Vector3(Position.X - 1, Position.Y + 1, Position.Z + 1),
+				p3 = new Vector3(Position.X + 1, Position.Y + 1, Position.Z + 1)*/
 			};
-
-			Screen.p0 = new Vector3(Screen.PosX1, Screen.PosY1, Screen.PosZ) + ScreenDistance * Direction;
-			Screen.p1 = new Vector3(Screen.PosX2, Screen.PosY1, Screen.PosZ) + ScreenDistance * Direction;
-			Screen.p2 = new Vector3(Screen.PosX1, Screen.PosY2, Screen.PosZ) + ScreenDistance * Direction;
-			Screen.p3 = new Vector3(Screen.PosX2, Screen.PosY2, Screen.PosZ) + ScreenDistance * Direction;
+			Screen.p0 = new Vector3(Screen.PosX1, Screen.PosY1, Screen.PosZ1) + ScreenDistance * Direction;
+			Screen.p1 = new Vector3(Screen.PosX2, Screen.PosY1, Screen.PosZ2) + ScreenDistance * Direction;
+			Screen.p2 = new Vector3(Screen.PosX1, Screen.PosY2, Screen.PosZ1) + ScreenDistance * Direction;
+			Screen.p3 = new Vector3(Screen.PosX2, Screen.PosY2, Screen.PosZ2) + ScreenDistance * Direction;
 		}
-	} // class Camera
+	}
 
 	public class Screen
 	{
 		public Vector3 p0, p1, p2, p3;
-		public float PosX1, PosX2, PosY1, PosY2, PosZ;
+		public float PosX1, PosX2, PosY1, PosY2, PosZ1, PosZ2;
 	}
 
 
@@ -147,6 +156,8 @@ namespace Template
 		public Vector3 Direction { get; set; }
 		public Vector3 Origin { get; set; }
 		public float Distance { get; set; } = 1e34f;
+
+		
 	}
 
 	public class LightSource
@@ -182,19 +193,26 @@ namespace Template
 			{
 				Intersection temp = primitive.Intersect(ray);
 				if (temp != null)
+				{
 					if (temp.Distance > 0)
+					{
 						if (result != null)
+						{
 							if (temp.Distance < ray.Distance)
 							{
 								result = temp;
 								ray.Distance = result.Distance;
 
 							}
+						}
 						else
 						{
 							result = temp;
 							ray.Distance = temp.Distance;
 						}
+					}
+				}
+
 			}
 			
 			return result;
@@ -207,12 +225,15 @@ namespace Template
 			{
 				Intersection temp = primitive.Intersect(ray);
 				if (temp != null)
+				{
 					return temp;
+				}
+
 			}
 
 			return result;
 		}
-	} // class Scene
+	}
 
 	public class Intersection
 	{
@@ -221,4 +242,4 @@ namespace Template
 		public float Distance { get; set; }
 		public Primitive Primitive { get; set; }
 	}
-} // namespace Template
+}
