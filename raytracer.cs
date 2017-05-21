@@ -337,7 +337,7 @@ namespace Template
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
 			Primitives.Add(new Plane(new Vector3(0f,  -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1,1,1)));
-			//Primitives.Add(new Plane(new Vector3(0f, 0f, 7f), new Vector3(0f, 0f, -1f), new Vector3(1, 0, 1)));
+			Primitives.Add(new Plane(new Vector3(0f, 0f, 7f), new Vector3(0f, 0f, -1f), new Vector3(1, 0, 1)));
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
 			Primitives.Add(new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f,1,0.1f)));
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(0.1f,0.1f,1)));
@@ -381,7 +381,7 @@ namespace Template
 			foreach (Primitive primitive in Primitives)
 			{
 				Intersection temp = primitive.Intersect(ray);
-				if (temp != null)
+				if (temp != null && temp.Distance < ray.Distance)
 				{
 					return temp;
 				}
