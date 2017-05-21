@@ -21,10 +21,23 @@ namespace Template
 		public Vector3[,] colors1 = new Vector3[256, 256], colors2 = new Vector3[256, 256], colors3 = new Vector3[256, 256], colors4 = new Vector3[256, 256], colors = new Vector3[512,512];
 		public List<Ray> rays = new List<Ray>(), shadowrays = new List<Ray>(), rays1 = new List<Ray>(), rays2 = new List<Ray>(), shadowrays1 = new List<Ray>(), shadowrays2 = new List<Ray>();
 		public bool smoothdraw = true;
+		int recursion = 4, antialiasing;
+		float aasqrt;
+		bool doaa = false;
+
+		public int Antialiasing
+		{
+			get {
+				return antialiasing;
+			}
+			set { antialiasing = value; aasqrt = (float)Math.Sqrt(value); }
+		}
+
 
 		public Raytracer()
 		{
 			Scene = new Scene();
+			Antialiasing = 16;
 			//Camera = new Camera();
 			Camera = new Camera(new Vector3(0f, 0f, -1f), new Vector3(0f, 0f, 1f));
 			DoRaysNStuff();
@@ -90,7 +103,8 @@ namespace Template
 			for (float x = 0; x < 256; x++)
 				for (float y = 0; y < 256; y++)
 				{
-					if (( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) || smoothdraw)
+					colors1[(int) x, (int) y] = new Vector3();
+					if ((( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !smoothdraw) || (smoothdraw && !doaa))
 					{
 						ray = new Ray();
 						ray.Origin = Camera.Position;
@@ -104,8 +118,36 @@ namespace Template
 						colors1[(int) x, (int) y] = Trace(ray, (int) x, (int) y);
 
 					}
-					else
-						colors1[(int) x, (int) y] = new Vector3();
+					else if (smoothdraw && doaa)
+					{
+						Vector3[,] avg = new Vector3[(int)aasqrt, (int)aasqrt];
+						for(float i = 0; i < aasqrt; i++)
+						{
+							for (float j = 0; j < aasqrt; j++)
+							{
+								ray = new Ray();
+								ray.Origin = Camera.Position;
+								//ray.Direction = Vector3.Normalize(new Vector3(Camera.Screen.p2.X + ((Camera.Screen.p) / 512f) * x, Camera.Screen.p2.Y - (2f / 512f) * y, Camera.Screen.p2.Z) - ray.Origin);
+								Vector3 xscreen, yscreen;
+								xscreen = Vector3.Normalize(Camera.Screen.p1 - Camera.Screen.p0);
+								yscreen = Vector3.Normalize(Camera.Screen.p2 - Camera.Screen.p0);
+								Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x + i / aasqrt ) / 256 ) + yscreen * ( ( y + j / aasqrt ) / 256 );
+
+								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
+								avg[(int)i,(int)j] = Trace(ray, (int) x, (int) y);
+							}
+						}
+						Vector3 final = new Vector3(0,0,0);
+						for (int i = 0; i < aasqrt; i++)
+						{
+							for (int j = 0; j < aasqrt; j++)
+							{
+								final += avg[i, j];
+							}
+						}
+						final /= Antialiasing;
+						colors1[(int) x, (int) y] = final;
+					}
 				}
 		}
 		void q2()
@@ -114,7 +156,8 @@ namespace Template
 			for (float x = 0; x < 256; x++)
 				for (float y = 0; y < 256; y++)
 				{
-					if (( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) || smoothdraw)
+					colors2[(int) x, (int) y] = new Vector3();
+					if (( ( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !smoothdraw ) || ( smoothdraw && !doaa ))
 					{
 						ray = new Ray();
 						ray.Origin = Camera.Position;
@@ -128,8 +171,36 @@ namespace Template
 						colors2[(int) x, (int) y] = Trace(ray, (int) x, (int) y);
 						
 					}
-					else
-						colors2[(int) x, (int) y] = new Vector3();
+					else if (smoothdraw && doaa)
+					{
+						Vector3[,] avg = new Vector3[(int) aasqrt, (int) aasqrt];
+						for (float i = 0; i < aasqrt; i++)
+						{
+							for (float j = 0; j < aasqrt; j++)
+							{
+								ray = new Ray();
+								ray.Origin = Camera.Position;
+								//ray.Direction = Vector3.Normalize(new Vector3(Camera.Screen.p2.X + ((Camera.Screen.p) / 512f) * x, Camera.Screen.p2.Y - (2f / 512f) * y, Camera.Screen.p2.Z) - ray.Origin);
+								Vector3 xscreen, yscreen;
+								xscreen = Vector3.Normalize(Camera.Screen.p1 - Camera.Screen.p0);
+								yscreen = Vector3.Normalize(Camera.Screen.p2 - Camera.Screen.p0);
+								Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x + 256 + i / aasqrt ) / 256 ) + yscreen * ( ( y + j / aasqrt ) / 256 );
+
+								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
+								avg[(int) i, (int) j] = Trace(ray, (int) x, (int) y);
+							}
+						}
+						Vector3 final = new Vector3(0, 0, 0);
+						for (int i = 0; i < aasqrt; i++)
+						{
+							for (int j = 0; j < aasqrt; j++)
+							{
+								final += avg[i, j];
+							}
+						}
+						final /= Antialiasing;
+						colors2[(int) x, (int) y] = final;
+					}
 				}
 		}
 		void q3()
@@ -138,7 +209,8 @@ namespace Template
 			for (float x = 0; x < 256; x++)
 				for (float y = 0; y < 256; y++)
 				{
-					if (( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) || smoothdraw)
+					colors3[(int) x, (int) y] = new Vector3();
+					if (( ( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !smoothdraw ) || ( smoothdraw && !doaa ))
 					{
 						ray = new Ray();
 						ray.Origin = Camera.Position;
@@ -157,8 +229,36 @@ namespace Template
 						else
 							colors3[(int) x, (int) y] = Trace(ray, (int) x, (int) y);
 					}
-					else
-						colors3[(int) x, (int) y] = new Vector3();
+					else if(smoothdraw && doaa)
+					{
+						Vector3[,] avg = new Vector3[(int) aasqrt, (int) aasqrt];
+						for (float i = 0; i < aasqrt; i++)
+						{
+							for (float j = 0; j < aasqrt; j++)
+							{
+								ray = new Ray();
+								ray.Origin = Camera.Position;
+								//ray.Direction = Vector3.Normalize(new Vector3(Camera.Screen.p2.X + ((Camera.Screen.p) / 512f) * x, Camera.Screen.p2.Y - (2f / 512f) * y, Camera.Screen.p2.Z) - ray.Origin);
+								Vector3 xscreen, yscreen;
+								xscreen = Vector3.Normalize(Camera.Screen.p1 - Camera.Screen.p0);
+								yscreen = Vector3.Normalize(Camera.Screen.p2 - Camera.Screen.p0);
+								Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x + i / aasqrt ) / 256 ) + yscreen * ( ( y + 256 + j / aasqrt ) / 256 );
+
+								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
+								avg[(int) i, (int) j] = Trace(ray, (int) x, (int) y);
+							}
+						}
+						Vector3 final = new Vector3(0, 0, 0);
+						for (int i = 0; i < aasqrt; i++)
+						{
+							for (int j = 0; j < aasqrt; j++)
+							{
+								final += avg[i, j];
+							}
+						}
+						final /= Antialiasing;
+						colors3[(int) x, (int) y] = final;
+					}
 				}
 		}
 		void q4()
@@ -167,7 +267,8 @@ namespace Template
 			for (float x = 0; x < 256; x++)
 				for (float y = 0; y < 256; y++)
 				{
-					if (( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) || smoothdraw)
+					colors4[(int) x, (int) y] = new Vector3();
+					if (( ( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !smoothdraw ) || ( smoothdraw && !doaa ))
 					{
 						ray = new Ray();
 						ray.Origin = Camera.Position;
@@ -187,8 +288,36 @@ namespace Template
 						else
 							colors4[(int) x, (int) y] = Trace(ray, (int) x, (int) y);
 					}
-					else
-						colors4[(int) x, (int) y] = new Vector3();
+					else if (smoothdraw && doaa)
+					{
+						Vector3[,] avg = new Vector3[(int) aasqrt, (int) aasqrt];
+						for (float i = 0; i < aasqrt; i++)
+						{
+							for (float j = 0; j < aasqrt; j++)
+							{
+								ray = new Ray();
+								ray.Origin = Camera.Position;
+								//ray.Direction = Vector3.Normalize(new Vector3(Camera.Screen.p2.X + ((Camera.Screen.p) / 512f) * x, Camera.Screen.p2.Y - (2f / 512f) * y, Camera.Screen.p2.Z) - ray.Origin);
+								Vector3 xscreen, yscreen;
+								xscreen = Vector3.Normalize(Camera.Screen.p1 - Camera.Screen.p0);
+								yscreen = Vector3.Normalize(Camera.Screen.p2 - Camera.Screen.p0);
+								Vector3 onscreen = Camera.Screen.p0 + xscreen * ( ( x + 256 + i / aasqrt ) / 256 ) + yscreen * ( ( y + 256 + j / aasqrt ) / 256 );
+
+								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
+								avg[(int) i, (int) j] = Trace(ray, (int) x, (int) y);
+							}
+						}
+						Vector3 final = new Vector3(0, 0, 0);
+						for (int i = 0; i < aasqrt; i++)
+						{
+							for (int j = 0; j < aasqrt; j++)
+							{
+								final += avg[i, j];
+							}
+						}
+						final /= Antialiasing;
+						colors4[(int) x, (int) y] = final;
+					}
 				}
 
 		}
@@ -278,25 +407,13 @@ namespace Template
 		
 		void CreateScreen()
 		{
-			Screen = new Screen
-			{
-				PosX1 = Position.X - 1,
-				PosX2 = Position.X + 1,
-				PosY1 = Position.Y - 1,
-				PosY2 = Position.Y + 1,
-				PosZ1 = Position.Z,
-				PosZ2 = Position.Z
-
-				/*p0 = new Vector3(Position.X - 1, Position.Y -1, Position.Z + 1),
-				p1 = new Vector3(Position.X + 1, Position.Y -1, Position.Z + 1),
-				p2 = new Vector3(Position.X - 1, Position.Y + 1, Position.Z + 1),
-				p3 = new Vector3(Position.X + 1, Position.Y + 1, Position.Z + 1)*/
-			};
+			Screen = new Screen();
 			Vector3 perp = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(0,1,0)));
-			Screen.p0 = Position + Direction * ScreenDistance + perp + new Vector3(0,1,0);
-			Screen.p1 = Position + Direction * ScreenDistance - perp + new Vector3(0, 1, 0);
-			Screen.p2 = Position + Direction * ScreenDistance + perp - new Vector3(0, 1, 0);
-			Screen.p3 = Position + Direction * ScreenDistance - perp - new Vector3(0, 1, 0);
+			Vector3 perpz = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(1,0,0)));
+			Screen.p0 = Position + Direction * ScreenDistance + perp + perpz;
+			Screen.p1 = Position + Direction * ScreenDistance - perp + perpz;
+			Screen.p2 = Position + Direction * ScreenDistance + perp - perpz;
+			Screen.p3 = Position + Direction * ScreenDistance - perp - perpz;
 		}
 
 	}
@@ -304,7 +421,6 @@ namespace Template
 	public class Screen
 	{
 		public Vector3 p0, p1, p2, p3;
-		public float PosX1, PosX2, PosY1, PosY2, PosZ1, PosZ2;
 	}
 
 
