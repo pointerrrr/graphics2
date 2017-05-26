@@ -354,7 +354,24 @@ namespace Template
 				else
 				{
 					Vector3 illumination = Illumination(intersect, shadow);
-					return intersect.Primitive.Material.Color * illumination;
+					if (intersect.Primitive.Material.Texture == null)
+					{
+						
+						return intersect.Primitive.Material.Color * illumination;
+					}
+					else
+					{
+						Vector3[,] image = intersect.Primitive.Material.Texture.Image;
+						Vector3 temp = intersect.IntersectionPoint - intersect.IntersectionNormal * intersect.IntersectionPoint.Y;
+						float x, y;
+						x = temp.X % 1;
+						if (x < 0)
+							x = 1 + x;
+						y = temp.Z % 1;
+						if (y < 0)
+							y = 1 + y;
+						return image[(int) (x * image.GetLength(0)), (int)(y * image.GetLength(1))] * illumination;
+					}
 				}
 				
 			}
@@ -488,7 +505,9 @@ namespace Template
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
-			Primitives.Add(new Plane(new Vector3(0f,  -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1,1,1)));
+			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1));
+			bottom.Material.Texture = new Texture("../../assets/checkers.png");
+			Primitives.Add(bottom);
 			Primitives.Add(new Plane(new Vector3(0f, 0f, 7f), new Vector3(0f, 0f, -1f), new Vector3(1, 0, 1)));
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
 			Primitives.Add(new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f,1,0.1f)));
