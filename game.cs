@@ -24,7 +24,8 @@ namespace Template {
 		// initialize
 		public void Init()
 		{
-			raytracer = new Raytracer();
+			float fov = 90;
+			raytracer = new Raytracer(fov);
 			
 		}
 		// tick: renders one frame
@@ -97,22 +98,22 @@ namespace Template {
 			if (NewKeyPress(Key.Up))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction + new Vector3(0, raytracer.Camera.Direction.Z, -raytracer.Camera.Direction.X) * ( (float) Math.PI / 180 ));
+				raytracer.Camera.z -= 10;
 			}
 			if (NewKeyPress(Key.Down))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction - new Vector3(0, raytracer.Camera.Direction.Z, -raytracer.Camera.Direction.X) * ( (float) Math.PI / 180 ));
+				raytracer.Camera.z += 10;
 			}
 			if (NewKeyPress(Key.Left))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction - new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * ( (float) Math.PI / 180 ));
+				raytracer.Camera.x -= 10;
 			}
 			if (NewKeyPress(Key.Right))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.Direction = Vector3.Normalize(raytracer.Camera.Direction + new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * ( (float) Math.PI / 180 ));
+				raytracer.Camera.x += 10;
 			}
 			if (NewKeyPress(Key.W))
 			{

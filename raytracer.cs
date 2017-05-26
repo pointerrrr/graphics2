@@ -20,6 +20,7 @@ namespace Template
 		public Camera Camera { get; set; }
 		public Vector3[,] colors1 = new Vector3[256, 256], colors2 = new Vector3[256, 256], colors3 = new Vector3[256, 256], colors4 = new Vector3[256, 256], colors = new Vector3[512,512];
 		public List<Ray> rays = new List<Ray>(), shadowrays = new List<Ray>(), rays1 = new List<Ray>(), rays2 = new List<Ray>(), shadowrays1 = new List<Ray>(), shadowrays2 = new List<Ray>(), reflectray = new List<Ray>(), reflect1 = new List<Ray>(), reflect2 = new List<Ray>();
+		public float FOV = 40;
 		public bool smoothdraw = true;
 		int maxrecursion = 4, antialiasing;
 		float aasqrt;
@@ -34,12 +35,13 @@ namespace Template
 		}
 
 
-		public Raytracer()
+		public Raytracer(float fov = 90)
 		{
+			FOV = fov;
 			Scene = new Scene();
 			Antialiasing = 16;
 			//Camera = new Camera();
-			Camera = new Camera(new Vector3(0f, 0f, -1f), new Vector3(0f, 0f, 1f));
+			Camera = new Camera(new Vector3(0f, 0f, -1f), new Vector3(0f, 0f, 1f), fov);
 			DoRaysNStuff();
 		}
 
@@ -425,6 +427,7 @@ namespace Template
 	{
 		public Vector3 Position { get; set; }
 		public Vector3 Direction { get; set; }
+		public float x = 0, z = 90;
 		public Screen Screen;
 		public float ScreenDistance;
 
@@ -441,17 +444,36 @@ namespace Template
 
 		}
 
-		public Camera(Vector3 position, Vector3 direction, float screenDistance = 1)
+		public Camera(Vector3 position, Vector3 direction, float fov = 90)
 		{
+			float distance = 1 / (float)Math.Tan((fov * (Math.PI / 180)) / 2);
 			Position = position;
 			Direction = direction;
-			ScreenDistance = screenDistance;
+			ScreenDistance = distance;
 			CreateScreen();
 			
 		}
 
+
+		public Camera(Vector3 position, float x, float z, float fov = 90)
+		{
+			float distance = 1 / (float) Math.Tan(( fov * ( Math.PI / 180 ) ) / 2);
+			Position = position;
+
+			Directionchange(x, z);
+			ScreenDistance = distance;
+			CreateScreen();
+
+		}
+
+		void Directionchange(float x, float z)
+		{
+			Direction = new Vector3((float) Math.Sin(x * Math.PI / 180) * (float) Math.Sin(z * Math.PI / 180), (float) Math.Cos(z * Math.PI / 180), (float) Math.Cos(x * Math.PI / 180) * (float) Math.Sin(z * Math.PI / 180));
+		}
+
 		public void Update()
 		{
+			Directionchange(x, z);
 			CreateScreen();
 		}
 		
