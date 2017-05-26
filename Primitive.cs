@@ -136,6 +136,76 @@ namespace Template
 		}
 	}
 
+	public class Triangle : Primitive
+	{
+		public Vector3 p0, p1, p2;
+		public Vector3 Normal;
+
+		public Triangle(Vector3 v0, Vector3 v1, Vector3 v2)
+		{
+			Material = new Material();
+			Material.Color = new Vector3(1,1,1);
+			p0 = v0;
+			p1 = v1;
+			p2 = v2;
+			Normal = Vector3.Normalize(Vector3.Cross(p1 - p0, p2 - p0));
+		}
+
+		public override Intersection Intersect(Ray ray)
+		{
+			Intersection result = new Intersection();
+			result.Primitive = this;
+			Vector3 e1, e2;  //Edge1, Edge2
+			Vector3 P, Q, T;
+			float det, inv_det, u, v;
+			float t;
+
+			//Find vectors for two edges sharing V1
+			e1 = p1 - p0;
+			e2 = p2 - p0;
+			//Begin calculating determinant - also used to calculate u parameter
+			P = Vector3.Cross(ray.Direction, e2);
+			//if determinant is near zero, ray lies in plane of triangle or ray is parallel to plane of triangle
+			det = Vector3.Dot(e1, P);
+			//NOT CULLING
+			if (det > -0.0001f && det < 0.0001f) return null;
+
+			inv_det = 1f / det;
+
+			//calculate distance from V1 to ray origin
+			T = Vector3.Subtract(ray.Origin, p0);
+
+			//Calculate u parameter and test bound
+			u = Vector3.Dot(T, P) * inv_det;
+			//The intersection lies outside of the triangle
+			if (u < 0f || u > 1f) return null;
+
+			//Prepare to test v parameter
+			Q = Vector3.Cross(T, e1);
+
+			//Calculate V parameter and test bound
+			v = Vector3.Dot(ray.Direction, Q) * inv_det;
+			//The intersection lies outside of the triangle
+			if (v < 0f || u + v > 1f) return null;
+
+			t = Vector3.Dot(e2, Q) * inv_det;
+
+			if (t > 0.0001f)
+			{ //ray intersection
+				result.Distance = t + 0.001f;
+				result.IntersectionPoint = t * ray.Direction - 0.001f * ray.Direction;
+				if(Vector3.Dot(Normal, ray.Direction) < 1 || Vector3.Dot(Normal, ray.Direction) > -1)
+					result.IntersectionNormal = -Normal;
+				else
+					result.IntersectionNormal = Normal;
+				return result;
+			}
+
+			// No hit, no win
+			return null;
+		}
+	}
+
 	public class Material
 	{
 		public Vector3 Color { get; set; }

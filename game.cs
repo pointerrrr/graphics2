@@ -98,22 +98,22 @@ namespace Template {
 			if (NewKeyPress(Key.Up))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.z -= 10;
+				raytracer.Camera.z -= 2.5f;
 			}
 			if (NewKeyPress(Key.Down))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.z += 10;
+				raytracer.Camera.z += 2.5f;
 			}
 			if (NewKeyPress(Key.Left))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.x -= 10;
+				raytracer.Camera.x -= 2.5f;
 			}
 			if (NewKeyPress(Key.Right))
 			{
 				raytracer.smoothdraw = false;
-				raytracer.Camera.x += 10;
+				raytracer.Camera.x += 2.5f;
 			}
 			if (NewKeyPress(Key.W))
 			{

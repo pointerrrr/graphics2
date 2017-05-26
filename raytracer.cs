@@ -372,6 +372,14 @@ namespace Template
 						y = temp.Z % 1;
 						if (y < 0)
 							y = 1 + y;
+						if (x >= 1)
+							x = 0;
+						if (x < 0)
+							x = 0;
+						if (y >= 1)
+							y = 0;
+						if (y < 0)
+							y = 0;
 						return image[(int) (x * image.GetLength(0)), (int)(y * image.GetLength(1))] * illumination;
 					}
 				}
@@ -481,7 +489,7 @@ namespace Template
 		{
 			Screen = new Screen();
 			Vector3 perp = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(0, 1, 0)));
-			Vector3 perpz = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(1, 0, 0)));
+			Vector3 perpz = -Vector3.Normalize(Vector3.Cross(Direction, perp));
 			if (perpz.Y < 0)
 				perpz = -perpz;
 			Screen.p0 = Position + Direction * ScreenDistance + perp + perpz;
@@ -534,6 +542,7 @@ namespace Template
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
 			Primitives.Add(new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f,1,0.1f)));
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
+			Primitives.Add(new Triangle(new Vector3(1,0,1), new Vector3(-1,0,1), new Vector3(0,1,1)));
 		}
 
 		public Intersection NearestIntersect(Ray ray)
