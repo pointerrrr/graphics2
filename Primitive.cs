@@ -10,7 +10,7 @@ namespace Template
 
 	public class Primitive
 	{
-		public Vector3 Color { get; set; } = new Vector3(1, 1, 1);
+		public Material Material { get; set; }
 
 		public virtual Intersection Intersect(Ray ray)
 		{
@@ -31,20 +31,23 @@ namespace Template
 
 		public Sphere()
 		{
-
+			Material = new Material();
 		}
 		
 		public Sphere(Vector3 position, float radius)
 		{
+			Material = new Material();
 			Position = position;
 			Radius = radius;
 		}
 
-		public Sphere(Vector3 position, float radius, Vector3 color)
+		public Sphere(Vector3 position, float radius, Vector3 color, bool reflect = false)
 		{
+			Material = new Material();
 			Position = position;
 			Radius = radius;
-			Color = color;
+			Material.Color = color;
+			Material.Reflect = reflect;
 		}
 
 		public override Intersection Intersect(Ray ray)
@@ -86,20 +89,23 @@ namespace Template
 
 		public Plane()
 		{
-
+			Material = new Material();
 		}
 
 		public Plane(Vector3 position, Vector3 normal)
 		{
+			Material = new Material();
 			Position = position;
 			Normal = normal;
 		}
 
-		public Plane(Vector3 position, Vector3 normal, Vector3 color)
+		public Plane(Vector3 position, Vector3 normal, Vector3 color, bool reflect = false)
 		{
+			Material = new Material();
 			Position = position;
 			Normal = normal;
-			Color = color;
+			Material.Color = color;
+			Material.Reflect = reflect;
 		}
 
 		// based off: http://cmichel.io/howto-raytracer-ray-plane-intersection-theory/
@@ -127,5 +133,27 @@ namespace Template
 		{
 			return Normal;
 		}
+	}
+
+	public class Material
+	{
+		public Vector3 Color { get; set; }
+		public bool Reflect { get; set; }
+		public float ReflectPercentage { get; set; }
+		public bool Refract { get; set; }
+		public float RefractPercentage { get; set; }
+		public float RefractionIndex { get; set; }
+		public Texture Texture { get; set; }
+
+		public Material()
+		{
+			Color = new Vector3(1,1,1);
+			Reflect = false;
+		}
+	}
+
+	public class Texture
+	{
+		
 	}
 }

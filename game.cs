@@ -59,6 +59,16 @@ namespace Template {
 							screen2.Line(( TX(point2S.X) ), ( TY(point2S.Z) ), TX(shadowRay.Origin.X), TY(shadowRay.Origin.Z), RGB(1, 0, 0));
 						}
 					}
+
+					for (int i = 0; i < raytracer.reflectray.Count; i += 10)
+					{
+						Ray reflectRay = raytracer.reflectray[i];
+						if (reflectRay != null)
+						{
+							Vector3 point2S = ( reflectRay.Direction * Math.Min(reflectRay.Distance, 100) ) + reflectRay.Origin;
+							screen2.Line(( TX(point2S.X) ), ( TY(point2S.Z) ), TX(reflectRay.Origin.X), TY(reflectRay.Origin.Z), RGB(0, 0.5f, 1));
+						}
+					}
 				}
 			}
 			List<Primitive> primitives = raytracer.Scene.Primitives;
@@ -67,7 +77,7 @@ namespace Template {
 				if (primitive.GetType() == typeof(Sphere))
 				{
 					Sphere temp = (Sphere) primitive;
-					screen2.Circle(TX(temp.Position.X), TY(temp.Position.Z), (int)(temp.Radius * 51.2 +1 ), RGB(temp.Color));
+					screen2.Circle(TX(temp.Position.X), TY(temp.Position.Z), (int)(temp.Radius * 51.2 +1 ), RGB(temp.Material.Color));
 				}
 			}
 			Screen traceScreen = raytracer.Camera.Screen;
@@ -137,6 +147,14 @@ namespace Template {
 			if (NewKeyPress(Key.Space))
 			{
 				raytracer.smoothdraw = true;
+			}
+			if (NewKeyPress(Key.T))
+			{
+				raytracer.doaa = true;
+			}
+			if (NewKeyPress(Key.Y))
+			{
+				raytracer.doaa = false;
 			}
 		}
 

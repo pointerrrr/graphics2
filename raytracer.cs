@@ -19,11 +19,11 @@ namespace Template
 		public Scene Scene { get; set; }
 		public Camera Camera { get; set; }
 		public Vector3[,] colors1 = new Vector3[256, 256], colors2 = new Vector3[256, 256], colors3 = new Vector3[256, 256], colors4 = new Vector3[256, 256], colors = new Vector3[512,512];
-		public List<Ray> rays = new List<Ray>(), shadowrays = new List<Ray>(), rays1 = new List<Ray>(), rays2 = new List<Ray>(), shadowrays1 = new List<Ray>(), shadowrays2 = new List<Ray>();
+		public List<Ray> rays = new List<Ray>(), shadowrays = new List<Ray>(), rays1 = new List<Ray>(), rays2 = new List<Ray>(), shadowrays1 = new List<Ray>(), shadowrays2 = new List<Ray>(), reflectray = new List<Ray>(), reflect1 = new List<Ray>(), reflect2 = new List<Ray>();
 		public bool smoothdraw = true;
-		int recursion = 4, antialiasing;
+		int maxrecursion = 4, antialiasing;
 		float aasqrt;
-		bool doaa = true;
+		public bool doaa = false;
 
 		public int Antialiasing
 		{
@@ -58,6 +58,9 @@ namespace Template
 			shadowrays1.Clear();
 			shadowrays2.Clear();
 			shadowrays.Clear();
+			reflect1.Clear();
+			reflect2.Clear();
+			reflectray.Clear();
 			t1 = new Thread(q1);
 			t2 = new Thread(q2);
 			t3 = new Thread(q3);
@@ -74,6 +77,8 @@ namespace Template
 			rays.AddRange(rays2);
 			shadowrays.AddRange(shadowrays1);
 			shadowrays.AddRange(shadowrays2);
+			reflectray.AddRange(reflect1);
+			reflectray.AddRange(reflect2);
 			for (int x = 0; x < 256; x++)
 				for(int y = 0; y < 256; y++)
 				{
@@ -224,7 +229,7 @@ namespace Template
 						if (y == 0)
 						{
 							rays1.Add(ray);
-							colors3[(int) x, (int) y] = Trace(ray, 1);
+							colors3[(int) x, (int) y] = Trace(ray, 0, 1, 1);
 						}
 						else
 							colors3[(int) x, (int) y] = Trace(ray);
@@ -285,7 +290,7 @@ namespace Template
 						if (y == 0)
 						{
 							rays2.Add(ray);
-							colors4[(int) x, (int) y] = Trace(ray, 2);
+							colors4[(int) x, (int) y] = Trace(ray, 0, 2, 2);
 						}
 						else
 							colors4[(int) x, (int) y] = Trace(ray);
@@ -326,16 +331,40 @@ namespace Template
 
 		}
 
-		Vector3 Trace(Ray ray, int shadow = 0)
+		Vector3 Trace(Ray ray, int recursion = 0, int shadow = 0, int recurse = 0)
 		{
 			Intersection intersect = Scene.NearestIntersect(ray);
 			if (intersect != null)
 			{
-				Vector3 illumination = Illumination(intersect, shadow);
-				return intersect.Primitive.Color * illumination;
+				if(intersect.Primitive.Material.Reflect)
+				{
+					Ray newray = new Ray();
+					
+					newray.Direction = Reflect(ray.Direction, intersect.IntersectionNormal);
+					newray.Origin = intersect.IntersectionPoint + newray.Direction * 0.01f;
+					if (recurse == 1)
+						reflect1.Add(newray);
+					if (recurse == 2)
+						reflect2.Add(newray);
+					if (recursion++ < maxrecursion)
+						return intersect.Primitive.Material.Color * Trace(newray, recursion);
+					else
+						return new Vector3(intersect.Primitive.Material.Color);
+				}
+				else
+				{
+					Vector3 illumination = Illumination(intersect, shadow);
+					return intersect.Primitive.Material.Color * illumination;
+				}
+				
 			}
 			else
 				return new Vector3(0, 0, 0);
+		}
+
+		public Vector3 Reflect(Vector3 direction, Vector3 normal)
+		{
+			return direction - 2 * Vector3.Dot(direction, normal) * normal;
 		}
 
 		Vector3 Illumination(Intersection intersection, int shadow = 0)
@@ -412,8 +441,8 @@ namespace Template
 		void CreateScreen()
 		{
 			Screen = new Screen();
-			Vector3 perp = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(0,1,0)));			
-			Vector3 perpz = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(1,0,0)));
+			Vector3 perp = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(0, 1, 0)));
+			Vector3 perpz = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(1, 0, 0)));
 			if (perpz.Y < 0)
 				perpz = -perpz;
 			Screen.p0 = Position + Direction * ScreenDistance + perp + perpz;
@@ -454,7 +483,8 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			LightSources.Add(new LightSource { Intensity = new Vector3(7f,7f,8f), Position = new Vector3( -1f, 0f, -1f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 3f, 5f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, 0f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
@@ -462,7 +492,7 @@ namespace Template
 			Primitives.Add(new Plane(new Vector3(0f, 0f, 7f), new Vector3(0f, 0f, -1f), new Vector3(1, 0, 1)));
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
 			Primitives.Add(new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f,1,0.1f)));
-			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(0.1f,0.1f,1)));
+			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
 		}
 
 		public Intersection NearestIntersect(Ray ray)
