@@ -125,8 +125,11 @@ namespace Template
 				return null;
 			}
 			result.Distance = distance - 0.0001f;
-			result.IntersectionNormal = Normal;
-			result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin - 0.0001f * ray.Direction;
+			if (Vector3.Dot(Normal, ray.Direction) > 0)
+				result.IntersectionNormal = -Normal;
+			else
+				result.IntersectionNormal = Normal;
+			result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
 			return result;
 		}
 
@@ -140,6 +143,7 @@ namespace Template
 	{
 		public Vector3 p0, p1, p2;
 		public Vector3 Normal;
+		private Plane plane;
 
 		public Triangle(Vector3 v0, Vector3 v1, Vector3 v2)
 		{
@@ -149,6 +153,7 @@ namespace Template
 			p1 = v1;
 			p2 = v2;
 			Normal = Vector3.Normalize(Vector3.Cross(p1 - p0, p2 - p0));
+			plane = new Plane(p0, Normal);
 		}
 
 		public override Intersection Intersect(Ray ray)
@@ -192,12 +197,7 @@ namespace Template
 
 			if (t > 0.0001f)
 			{ //ray intersection
-				result.Distance = t + 0.001f;
-				result.IntersectionPoint = t * ray.Direction - 0.001f * ray.Direction;
-				if(Vector3.Dot(Normal, ray.Direction) < 1 || Vector3.Dot(Normal, ray.Direction) > -1)
-					result.IntersectionNormal = -Normal;
-				else
-					result.IntersectionNormal = Normal;
+				result = plane.Intersect(ray);
 				return result;
 			}
 

@@ -31,7 +31,9 @@ namespace Template
 			get {
 				return antialiasing;
 			}
-			set { antialiasing = value; aasqrt = (float)Math.Sqrt(value); }
+			set {
+				antialiasing = value; aasqrt = (float)Math.Sqrt(value);
+			}
 		}
 
 
@@ -358,7 +360,6 @@ namespace Template
 					Vector3 illumination = Illumination(intersect, shadow);
 					if (intersect.Primitive.Material.Texture == null)
 					{
-						
 						return intersect.Primitive.Material.Color * illumination;
 					}
 					else
@@ -409,12 +410,11 @@ namespace Template
 				if (Vector3.Dot(N, L) > 0)
 				{
 					Ray shadowRay = new Ray { Origin = I, Direction = L, Distance = dist };
-
-
+					
 					Intersection result = Scene.FirstIntersect(shadowRay);
 					if (result == null)
 					{
-						float attenuation = 1 / ( dist * dist );
+						float attenuation = 1f / ( dist * dist );
 						shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
 					}
 					else
@@ -530,19 +530,20 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 3f, 5f) });
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, 0f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 5f, 5f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
 			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1));
 			bottom.Material.Texture = new Texture("../../assets/checkers.png");
 			Primitives.Add(bottom);
+			
 			Primitives.Add(new Plane(new Vector3(0f, 0f, 7f), new Vector3(0f, 0f, -1f), new Vector3(1, 0, 1)));
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
 			Primitives.Add(new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f,1,0.1f)));
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
-			Primitives.Add(new Triangle(new Vector3(1,0,1), new Vector3(-1,0,1), new Vector3(0,1,1)));
+			Primitives.Add(new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(0, 1, 1)));
 		}
 
 		public Intersection NearestIntersect(Ray ray)
@@ -583,7 +584,7 @@ namespace Template
 			foreach (Primitive primitive in Primitives)
 			{
 				Intersection temp = primitive.Intersect(ray);
-				if (temp != null && temp.Distance < ray.Distance)
+				if (temp != null && temp.Distance < ray.Distance && temp.Distance > 0.0001f)
 				{
 					return temp;
 				}
