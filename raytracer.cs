@@ -580,12 +580,34 @@ namespace Template
 			temping.Material.Texture = new Texture("../../assets/uffizi_probe.jpg");
 			Primitives.Add(temping);
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
-			Triangle temp = new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(0, 1, 2), new Vector3(1,1,1));
-			temp.Material.Texture = new Texture("../../assets/asdf.png");
-			Primitives.Add(temp);
-		}
 
-		public Intersection NearestIntersect(Ray ray)
+            Triangle temp = new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(0, 1, 2), new Vector3(1, 1, 1));
+            temp.Material.Texture = new Texture("../../assets/gizeh.jpg");
+            Primitives.Add(temp);
+
+            Triangle temp2 = new Triangle(new Vector3(-1, 0, 1), new Vector3(-1, 0, 3), new Vector3(0, 1, 2), new Vector3(1, 1, 1));
+            temp2.Material.Texture = new Texture("../../assets/gizeh.jpg");
+            Primitives.Add(temp2);
+
+            Triangle temp3 = new Triangle(new Vector3(-1, 0, 3), new Vector3(1, 0, 3), new Vector3(0, 1, 2), new Vector3(1, 1, 1));
+            temp3.Material.Texture = new Texture("../../assets/gizeh.jpg");
+            Primitives.Add(temp3);
+
+            Triangle temp4 = new Triangle(new Vector3(1, 0, 3), new Vector3(1, 0, 1), new Vector3(0, 1, 2), new Vector3(1, 1, 1));
+            temp4.Material.Texture = new Texture("../../assets/gizeh.jpg");
+            Primitives.Add(temp4);
+
+            Triangle temp5 = new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(1, 0, 3), new Vector3(1, 1, 1));
+            temp5.Material.Texture = new Texture("../../assets/gizeh.jpg");
+            Primitives.Add(temp5);
+
+            Triangle temp6 = new Triangle(new Vector3(-1, 0, 3), new Vector3(1, 0, 3), new Vector3(-1, 0, 1), new Vector3(1, 1, 1));
+            temp6.Material.Texture = new Texture("../../assets/gizeh.jpg");
+            Primitives.Add(temp6);
+
+        }
+
+        public Intersection NearestIntersect(Ray ray)
 		{
 			Intersection result = null;
 			foreach(Primitive primitive in Primitives)
