@@ -29,7 +29,7 @@ namespace Template {
 		// tick: renders one frame
 		public void Tick()
 		{
-			// let the raytracer update the camera and then render the secne
+			// let the raytracer update the camera and then render the scene
 			raytracer.Camera.Update();
 			raytracer.Render();
 			// draw the view
@@ -65,9 +65,9 @@ namespace Template {
 				}
 			}
 			// draw the secondary rays in cyan
-			for (int i = 0; i < raytracer.reflectray.Count; i += 10)
+			for (int i = 0; i < raytracer.reflectrays.Count; i += 10)
 			{
-				Ray reflectRay = raytracer.reflectray[i];
+				Ray reflectRay = raytracer.reflectrays[i];
 				if (reflectRay != null)
 				{
 					Vector3 point2S = ( reflectRay.Direction * Math.Min(reflectRay.Distance, 100) ) + reflectRay.Origin;

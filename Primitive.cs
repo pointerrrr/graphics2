@@ -63,13 +63,16 @@ namespace Template
 			return null;			
 		}
 
-		// calculations found on http://www.pauldebevec.com/Probes/
+		// finding the texture of the sphere ( calculations found on http://www.pauldebevec.com/Probes/)
 		public override Vector3 GetTexture(Intersection intersect)
 		{
+			// direction of vector for finding coordinates
 			Vector3 d = Vector3.Normalize( Position - intersect.IntersectionPoint);
 			float r = (float) ( ( 1d / Math.PI ) * Math.Acos(d.Z) / Math.Sqrt(d.X * d.X + d.Y * d.Y) );
+			// finding the coordinates
 			float u = r * d.X + 1;
 			float v = r * d.Y + 1;
+			// scaling the coordinates to image size
 			int iu = (int) ( u * intersect.Primitive.Material.Texture.Image.GetLength(0) / 2) ;
 			int iv = (int) ( v * intersect.Primitive.Material.Texture.Image.GetLength(1) / 2 );
 			// fail-safe to make sure the returned value is always within the image
