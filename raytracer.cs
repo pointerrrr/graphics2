@@ -422,6 +422,13 @@ namespace Template
 						shadowrays2.Add(shadowRay);
 				}
 			}
+			// minimum light level of 0.3f
+			if (shadows.X < 0.3f)
+				shadows.X = 0.3f;
+			if (shadows.Y < 0.3f)
+				shadows.Y = 0.3f;
+			if (shadows.Z < 0.3f)
+				shadows.Z = 0.3f;
 			return shadows;
 		}
 
