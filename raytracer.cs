@@ -18,6 +18,7 @@ namespace Template
 	{
 		public Scene Scene { get; set; }
 		public Camera Camera { get; set; }
+		public Skybox Skydome { get; set; }
 		public Vector3[,] colors1 = new Vector3[256, 256], colors2 = new Vector3[256, 256], colors3 = new Vector3[256, 256], colors4 = new Vector3[256, 256], colors = new Vector3[512,512];
 		public List<Ray> rays = new List<Ray>(), shadowrays = new List<Ray>(), rays1 = new List<Ray>(), rays2 = new List<Ray>(), shadowrays1 = new List<Ray>(), shadowrays2 = new List<Ray>(), reflectray = new List<Ray>(), reflect1 = new List<Ray>(), reflect2 = new List<Ray>();
 		public float FOV = 40;
@@ -44,6 +45,7 @@ namespace Template
 			Antialiasing = 16;
 			//Camera = new Camera();
 			Camera = new Camera(new Vector3(0f, 0f, -1f), new Vector3(0f, 0f, 1f), fov);
+			Skydome = new Skybox("../../assets/stpeters_probe.jpg");
 			DoRaysNStuff();
 		}
 
@@ -364,14 +366,14 @@ namespace Template
 					}
 					else
 					{
-						return intersect.Primitive.GetTexture(intersect)*illumination;
+						return intersect.Primitive.GetTexture(intersect) * illumination;
 						
 					}
 				}
 				
 			}
 			else
-				return new Vector3(0, 0, 0);
+				return Skybox(ray);
 		}
 
 		public Vector3 Reflect(Vector3 direction, Vector3 normal)
@@ -420,6 +422,26 @@ namespace Template
 				}
 			}
 			return shadows;
+		}
+
+		public Vector3 Skybox(Ray ray)
+		{
+			Vector3 d = -ray.Direction;
+			float r = (float) ( ( 1d / Math.PI ) * Math.Acos(d.Z) / Math.Sqrt(d.X * d.X + d.Y * d.Y) );
+			float u = r*d.X+1;
+			float v = r*d.Y+1;
+			
+			int iu = (int) ( u * Skydome.Texture.Image.GetLength(0)  / 2) ;
+			int iv = (int) ( v * Skydome.Texture.Image.GetLength(1) / 2 );
+			if (iu >= Skydome.Texture.Image.GetLength(0))
+				iu = 0;
+			if (iu < 0)
+				iu = 0;
+			if (iv >= Skydome.Texture.Image.GetLength(1))
+				iv = 0;
+			if (iv < 0)
+				iv = 0;
+			return Skydome.Texture.Image[iu, iv];
 		}
 	}
 
@@ -541,24 +563,18 @@ namespace Template
 			LightSources = new List<LightSource>();
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
-			//LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 2f, 3f) });
-			LightSources.Add(new Spotlight(new Vector3(0, 0, -1), new Vector3(20f, 20f, 15f), new Vector3(0f, 0, 1), 90));
-			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
-			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
-			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
+			LightSources.Add(new Spotlight(new Vector3(0, 0, -1), new Vector3(20f, 20f, 15f), new Vector3(0f, 0, 1), 30));
 			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1));
 			bottom.Material.Texture = new Texture("../../assets/checkers.png");
 			Primitives.Add(bottom);
-			
-			Primitives.Add(new Plane(new Vector3(0f, 0f, 7f), new Vector3(0f, 0f, -1f), new Vector3(1, 0, 1)));
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
 			Sphere temping = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f, 1, 0.1f));
-			temping.Material.Texture = new Texture("../../assets/sphere.jpg");
+			temping.Material.Texture = new Texture("../../assets/uffizi_probe.jpg");
 			Primitives.Add(temping);
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
 			Triangle temp = new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(0, 1, 1));
 			temp.Material.Texture = new Texture("../../assets/asdf.png");
-			//Primitives.Add(temp);
+			Primitives.Add(temp);
 		}
 
 		public Intersection NearestIntersect(Ray ray)

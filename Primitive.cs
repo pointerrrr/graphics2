@@ -91,20 +91,20 @@ namespace Template
 		public override Vector3 GetTexture(Intersection intersect)
 		{
 			Vector3 d = Vector3.Normalize( Position - intersect.IntersectionPoint);
-			float u = 0.5f + (float)(Math.Atan2(d.X, d.Z))/(float)(Math.PI*2f);
-			float v = 0.5f - (float)Math.Asin(d.Y)/(float)(Math.PI);
-			if (u >= 1)
-				u = 0;
-			if (u < 0)
-				u = 0;
-			if (v >= 1)
-				v = 0;
-			if (v < 0)
-				v = 0;
-			int iu = (int)(u * Material.Texture.Image.GetLength(0));
-			int iv = (int) ( v * Material.Texture.Image.GetLength(1) );
-
-			return Material.Texture.Image[iu, iv];
+			float r = (float) ( ( 1d / Math.PI ) * Math.Acos(d.Z) / Math.Sqrt(d.X * d.X + d.Y * d.Y) );
+			float u = r * d.X + 1;
+			float v = r * d.Y + 1;
+			int iu = (int) ( u * intersect.Primitive.Material.Texture.Image.GetLength(0) / 2) ;
+			int iv = (int) ( v * intersect.Primitive.Material.Texture.Image.GetLength(1) / 2 );
+			if (iu >= intersect.Primitive.Material.Texture.Image.GetLength(0))
+				iu = 0;
+			if (iu < 0)
+				iu = 0;
+			if (iv >= intersect.Primitive.Material.Texture.Image.GetLength(1))
+				iv = 0;
+			if (iv < 0)
+				iv = 0;
+			return intersect.Primitive.Material.Texture.Image[iu, iv];
 		}
 	}
 
@@ -319,6 +319,21 @@ namespace Template
 		{
 			Bitmap image = new Bitmap(path);
 			bitmap = image;
+		}
+	}
+
+	public class Skybox
+	{
+		public Texture Texture { get; set; }
+
+		public Skybox(string path)
+		{
+			Texture = new Texture(path);
+		}
+
+		public Skybox(Bitmap image)
+		{
+			Texture = new Texture(image);
 		}
 	}
 }
