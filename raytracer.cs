@@ -387,8 +387,9 @@ namespace Template
 			
 			for (int i = 0; i < Scene.LightSources.Count; i++)
 			{
+				LightSource lightSource = Scene.LightSources[i];
 				Vector3 I = intersection.IntersectionPoint;
-				Vector3 L = Scene.LightSources[i].Position - I;
+				Vector3 L = lightSource.Position - I;
 				Vector3 N = intersection.IntersectionNormal;
 				
 				float dist =  L.Length;
@@ -396,39 +397,73 @@ namespace Template
 				float NormalDot = Vector3.Dot(N, L);
 				if (NormalDot > 0)
 				{
-					Ray shadowRay = new Ray { Origin = I, Direction = L, Distance = dist };
-					
-					Intersection result = Scene.FirstIntersect(shadowRay);
-					if (result == null)
+					if (lightSource.GetType() == typeof(PointLight))
 					{
-						float attenuation = 1f / ( dist * dist );
-						if (Scene.LightSources[i].GetType() == typeof(Spotlight))
+						Ray shadowRay = new Ray { Origin = I, Direction = L, Distance = dist };
+
+						Intersection result = Scene.FirstIntersect(shadowRay);
+						if (result == null)
 						{
-							Spotlight light = (Spotlight)Scene.LightSources[i];
-							float dot = -Vector3.Dot(light.Direction, L);
-							if (dot >= light.Dot && dot > 0)
-								shadows += light.Intensity * NormalDot * attenuation;
+							float attenuation = 1f / (dist * dist);
+							if (lightSource.GetType() == typeof(Spotlight))
+							{
+								Spotlight light = (Spotlight)lightSource;
+								float dot = -Vector3.Dot(light.Direction, L);
+								if (dot >= light.Dot && dot > 0)
+									shadows += light.Intensity * NormalDot * attenuation;
+							}
+							else
+								shadows += lightSource.Intensity * NormalDot * attenuation;
 						}
 						else
-							shadows += Scene.LightSources[i].Intensity * NormalDot * attenuation;
+						{
+							shadowRay.Distance = result.Distance;
+						}
+						if (shadow == 1)
+							shadowrays1.Add(shadowRay);
+						if (shadow == 2)
+							shadowrays2.Add(shadowRay);
 					}
-					else
+
+					else if (lightSource.GetType() == typeof(AreaLight))
 					{
-						shadowRay.Distance = result.Distance;
+						AreaLight light = (AreaLight)lightSource;
+						Vector3 Color = new Vector3(0, 0, 0);
+
+						float yfactor = light.Area.Height / 3;
+						float xfactor = light.Area.Width / 3;
+
+						float attenuation = 1f / (dist * dist);
+						for (int x = 0; x < 3; x++)
+							for (int y = 0; y < 3; y++)
+							{
+								Vector3 lightPoint = new Vector3(light.Area.p0.X + x * xfactor, light.Area.p0.Y, light.Area.p0.Z + y * yfactor);
+								Vector3 direction = Vector3.Normalize(lightPoint - I);
+								Ray areaShadowRay = new Ray { Origin = I, Direction = direction, Distance = dist };
+								Intersection result = Scene.FirstIntersect(areaShadowRay);
+								if (result == null)
+								{
+									Color += (light.Intensity / 9);
+								}
+								else
+									areaShadowRay.Distance = result.Distance;
+
+								if (shadow == 1)
+									shadowrays1.Add(areaShadowRay);
+								if (shadow == 2)
+									shadowrays2.Add(areaShadowRay);
+							}
+						shadows += Color * attenuation;
 					}
-					if (shadow == 1)
-						shadowrays1.Add(shadowRay);
-					if (shadow == 2)
-						shadowrays2.Add(shadowRay);
 				}
 			}
 			// minimum light level of 0.3f
-			if (shadows.X < 0.3f)
+			/*if (shadows.X < 0.3f)
 				shadows.X = 0.3f;
 			if (shadows.Y < 0.3f)
 				shadows.Y = 0.3f;
 			if (shadows.Z < 0.3f)
-				shadows.Z = 0.3f;
+				shadows.Z = 0.3f;*/
 			return shadows;
 		}
 
@@ -543,7 +578,12 @@ namespace Template
 		public Vector3 Intensity { get; set; }
 	}
 
-	public class Spotlight : LightSource
+	public class PointLight : LightSource
+	{
+
+	}
+
+	public class Spotlight : PointLight
 	{
 		public Vector3 Direction { get; set; }
 		public float Angle;
@@ -559,6 +599,43 @@ namespace Template
 		}
 	}
 
+	public class AreaLight : LightSource
+	{
+		public Quad Area { get; set; }
+		public AreaLight(Vector3 position, Vector3 direction, float height, float width, Vector3 intensity)
+		{
+			Area = new Quad(position, direction, height, width);
+			Position = position;
+			Intensity = intensity;
+		}
+	}
+
+	public class Quad
+	{
+		public Vector3 p0, p1, p2, p3, Normal;
+		public float Width, Height;
+		public Quad(Vector3 position, Vector3 direction, float height, float width)
+		{
+			Width = width / 2;
+			Height = height / 2;
+			Vector3 perpx;
+			if (direction == new Vector3(0, -1, 0))
+				perpx = Vector3.Normalize(Vector3.Cross(direction, new Vector3(0, 0, 1)));
+			else
+				perpx = Vector3.Normalize(Vector3.Cross(direction, new Vector3(0, 1, 0)));
+
+			Vector3 perpy = -Vector3.Normalize(Vector3.Cross(direction, perpx));
+			perpx *= Height;
+			perpy *= Width;
+			if (perpy.Y < 0)
+				perpy = -perpy;
+			p0 = position + perpx + perpy;
+			p1 = position - perpx + perpy;
+			p2 = position + perpx - perpy;
+			p3 = position - perpx - perpy;
+			Normal = Vector3.Normalize(direction);
+		}
+	}
 	
 	public class Scene
 	{
@@ -569,9 +646,10 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
-			LightSources.Add(new Spotlight(new Vector3(0, 0, -1), new Vector3(20f, 20f, 15f), new Vector3(0f, 0, 1), 30));
+			//LightSources.Add(new PointLight { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
+			//LightSources.Add(new PointLight { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
+			//LightSources.Add(new Spotlight(new Vector3(0, 0, -1), new Vector3(20f, 20f, 15f), new Vector3(0f, 0, 1), 30));
+			LightSources.Add(new AreaLight(new Vector3(0, 0, 0), new Vector3(0, -1, 0), 1f, 1f, new Vector3(20f, 20f, 0)));
 			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1));
 			bottom.Material.Texture = new Texture("../../assets/checkers.png");
 			Primitives.Add(bottom);
@@ -580,7 +658,7 @@ namespace Template
 			temping.Material.Texture = new Texture("../../assets/uffizi_probe.jpg");
 			Primitives.Add(temping);
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
-			Triangle temp = new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(0, 1, 2), new Vector3(1,1,1));
+			Triangle temp = new Triangle(new Vector3(1, 2, 4), new Vector3(-1, 2, 4), new Vector3(0, 2, 3), new Vector3(1,1,1));
 			temp.Material.Texture = new Texture("../../assets/asdf.png");
 			Primitives.Add(temp);
 		}
