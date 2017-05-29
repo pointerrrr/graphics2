@@ -42,8 +42,16 @@ namespace Template {
 
 			// from here it's the debug view drawing
 			screen2.Clear(0x0);
+			// draw text:
+			if(raytracer.DoAA)
+				screen2.Print("Anti-aliasing:" + raytracer.Antialiasing + "x", 2,2 , RGB(1, 1, 0));
+			else
+				screen2.Print("Anti-aliasing:" + raytracer.DoAA, 2, 2, RGB(1, 1, 0));
+			screen2.Print("Recursion depth:" + raytracer.MaxRecursion, 2, 17, RGB(1, 1, 0));
+			screen2.Print("Smoothdraw:" + raytracer.Smoothdraw, 2, 32, RGB(1, 1, 0));
+			screen2.Print("FOV:" + raytracer.Camera.FOV, 2, 47, RGB(1, 1, 0));
 			// draw the primary rays in white
-			for(int x = 0; x < 512; x += 10)
+			for (int x = 0; x < 512; x += 10)
 			{
 				if (raytracer.rays.Count > x)
 				{
@@ -112,69 +120,89 @@ namespace Template {
 			// rotating the camera
 			if (NewKeyPress(Key.Up))
 			{
-				raytracer.smoothdraw = false;
-				raytracer.Camera.z -= 2.5f;
+				raytracer.Smoothdraw = false;
+				raytracer.Camera.Z -= 2.5f;
 			}
 			if (NewKeyPress(Key.Down))
 			{
-				raytracer.smoothdraw = false;
-				raytracer.Camera.z += 2.5f;
+				raytracer.Smoothdraw = false;
+				raytracer.Camera.Z += 2.5f;
 			}
 			if (NewKeyPress(Key.Left))
 			{
-				raytracer.smoothdraw = false;
-				raytracer.Camera.x -= 2.5f;
+				raytracer.Smoothdraw = false;
+				raytracer.Camera.X -= 2.5f;
 			}
 			if (NewKeyPress(Key.Right))
 			{
-				raytracer.smoothdraw = false;
-				raytracer.Camera.x += 2.5f;
+				raytracer.Smoothdraw = false;
+				raytracer.Camera.X += 2.5f;
 			}
 			//moving the camera
 			if (NewKeyPress(Key.W))
 			{
-				raytracer.smoothdraw = false;
+				raytracer.Smoothdraw = false;
 				raytracer.Camera.Position +=  new Vector3(raytracer.Camera.Direction.X, 0, raytracer.Camera.Direction.Z) * 0.1f;
 			}
 			if (NewKeyPress(Key.S))
 			{
-				raytracer.smoothdraw = false;
+				raytracer.Smoothdraw = false;
 				raytracer.Camera.Position -= new Vector3(raytracer.Camera.Direction.X, 0, raytracer.Camera.Direction.Z) * 0.1f;
 			}
 			if (NewKeyPress(Key.A))
 			{
-				raytracer.smoothdraw = false;
+				raytracer.Smoothdraw = false;
 				raytracer.Camera.Position -= new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * 0.1f;
 			}
 			if (NewKeyPress(Key.D))
 			{
-				raytracer.smoothdraw = false;
+				raytracer.Smoothdraw = false;
 				raytracer.Camera.Position += new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * 0.1f;
 			}
 			if (NewKeyPress(Key.Z))
 			{
-				raytracer.smoothdraw = false;
+				raytracer.Smoothdraw = false;
 				raytracer.Camera.Position += new Vector3(0f, -0.1f, 0f);
 			}
 			if (NewKeyPress(Key.X))
 			{
-				raytracer.smoothdraw = false;
+				raytracer.Smoothdraw = false;
 				raytracer.Camera.Position += new Vector3(0f, 0.1f, 0f);
+			}
+			if (NewKeyPress(Key.P))
+			{
+				raytracer.Smoothdraw = false;
+				raytracer.Camera.FOV = Math.Min(170, raytracer.Camera.FOV + 1);
+			}
+			if (NewKeyPress(Key.O))
+			{
+				raytracer.Smoothdraw = false;
+				raytracer.Camera.FOV = Math.Max(10, raytracer.Camera.FOV - 1);
+			}
+			if (NewKeyPress(Key.Comma))
+			{
+				raytracer.Smoothdraw = false;
+				raytracer.MaxRecursion = Math.Min(100, raytracer.MaxRecursion + 1);
+			}
+			if (NewKeyPress(Key.Period))
+			{
+				raytracer.Smoothdraw = false;
+				raytracer.MaxRecursion = Math.Max(2, raytracer.MaxRecursion - 1);
 			}
 			// enable smooth drawing (draws all the pixel (with anti aliasing if it's enabled)
 			if (NewKeyPress(Key.Space))
 			{
-				raytracer.smoothdraw = true;
+				raytracer.Smoothdraw = true;
 			}
 			// enable aa
 			if (NewKeyPress(Key.T))
 			{
-				raytracer.doaa = true;
+				raytracer.DoAA = true;
 			}
 			// disable aa
 			if (NewKeyPress(Key.Y))
 			{
-				raytracer.doaa = false;
+				raytracer.DoAA = false;
 			}
 		}
 

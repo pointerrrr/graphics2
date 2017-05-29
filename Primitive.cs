@@ -34,7 +34,7 @@ namespace Template
 			Material.Reflect = reflect;
 		}
 
-		// adaption of the fast ray - sphere intersect from the slides
+		// adaptation of the fast ray - sphere intersect from the slides
 		public override Intersection Intersect(Ray ray)
 		{
 			// setup the result for returning

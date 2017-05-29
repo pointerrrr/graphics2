@@ -25,11 +25,11 @@ namespace Template
 		// float for field of view (in degrees)
 		public float FOV = 90;
 		// are we drawing all pixels, or just half for speed
-		public bool smoothdraw = true;
+		public bool Smoothdraw = true;
 		// are we drawing with anti aliazsing
-		public bool doaa = false;
+		public bool DoAA = false;
 		// the maximum recursion depth for reflections
-		public int maxrecursion = 4;
+		public int MaxRecursion = 4;
 		// private int of antialiasing, used for the public property
 		private int antialiasing;
 		// the sqrt of anti aliasing, used for calculations when using anti aliasing
@@ -166,7 +166,7 @@ namespace Template
 					// clear the current pixel
 					colors1[(int) x, (int) y] = new Vector3();
 					// trace the current pixel if aa is disabled, or if smoothdraw is disabled (but only half of them then)
-					if ((( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !smoothdraw) || (smoothdraw && !doaa))
+					if ((( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !Smoothdraw) || (Smoothdraw && !DoAA))
 					{
 						// finding the point on the camera screen to shoot the ray through
 						Vector3 xscreen, yscreen;
@@ -181,7 +181,7 @@ namespace Template
 						colors1[(int) x, (int) y] = Trace(ray);
 					}
 					// draw with antialiasing
-					else if (smoothdraw && doaa)
+					else if (Smoothdraw && DoAA)
 					{
 						// temporary 2d array for saving all the result of the anti aliasing rays
 						Vector3[,] avg = new Vector3[(int)aasqrt, (int)aasqrt];
@@ -228,7 +228,7 @@ namespace Template
 				for (float y = 0; y < 256; y++)
 				{
 					colors2[(int) x, (int) y] = new Vector3();
-					if (( ( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !smoothdraw ) || ( smoothdraw && !doaa ))
+					if (( ( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !Smoothdraw ) || ( Smoothdraw && !DoAA ))
 					{
 						Vector3 xscreen, yscreen;
 						xscreen = Vector3.Normalize(Camera.Screen.p1 - Camera.Screen.p0);
@@ -239,7 +239,7 @@ namespace Template
 						ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
 						colors2[(int) x, (int) y] = Trace(ray);
 					}
-					else if (smoothdraw && doaa)
+					else if (Smoothdraw && DoAA)
 					{
 						Vector3[,] avg = new Vector3[(int) aasqrt, (int) aasqrt];
 						for (float i = 0; i < aasqrt; i++)
@@ -278,7 +278,7 @@ namespace Template
 				for (float y = 0; y < 256; y++)
 				{
 					colors3[(int) x, (int) y] = new Vector3();
-					if (( ( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !smoothdraw ) || ( smoothdraw && !doaa ))
+					if (( ( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !Smoothdraw ) || ( Smoothdraw && !DoAA ))
 					{
 						Vector3 xscreen, yscreen;
 						xscreen = Vector3.Normalize(Camera.Screen.p1 - Camera.Screen.p0);
@@ -295,7 +295,7 @@ namespace Template
 						else
 							colors3[(int) x, (int) y] = Trace(ray);
 					}
-					else if(smoothdraw && doaa)
+					else if(Smoothdraw && DoAA)
 					{
 						Vector3[,] avg = new Vector3[(int) aasqrt, (int) aasqrt];
 						for (float i = 0; i < aasqrt; i++)
@@ -336,7 +336,7 @@ namespace Template
 				for (float y = 0; y < 256; y++)
 				{
 					colors4[(int) x, (int) y] = new Vector3();
-					if (( ( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !smoothdraw ) || ( smoothdraw && !doaa ))
+					if (( ( ( x % 2 == 0 && y % 2 == 1 ) || ( x % 2 == 1 && y % 2 == 0 ) ) && !Smoothdraw ) || ( Smoothdraw && !DoAA ))
 					{
 						Vector3 xscreen, yscreen;
 						xscreen = Vector3.Normalize(Camera.Screen.p1 - Camera.Screen.p0);
@@ -353,7 +353,7 @@ namespace Template
 						else
 							colors4[(int) x, (int) y] = Trace(ray);
 					}
-					else if (smoothdraw && doaa)
+					else if (Smoothdraw && DoAA)
 					{
 						Vector3[,] avg = new Vector3[(int) aasqrt, (int) aasqrt];
 						for (float i = 0; i < aasqrt; i++)
@@ -409,7 +409,7 @@ namespace Template
 					if (recurse == 2)
 						reflect2.Add(reflectray);
 					// are we within the recursion limit
-					if (recursion++ < maxrecursion)
+					if (recursion++ < MaxRecursion)
 						return intersect.Primitive.Material.Color * Trace(reflectray, recursion);
 					else
 						return new Vector3(intersect.Primitive.Material.Color);
@@ -534,15 +534,18 @@ namespace Template
 		public Vector3 Position { get; set; }
 		public Vector3 Direction { get; set; }
 		// screen for shooting rays
-		public Screen Screen;
+		public Screen Screen { get; set; }
 		// rotation of the camera in degrees (x is for turning left and right, y for up and down)
-		public float x = 0, z = 90;
+		public float X = 0, Z = 90;
+		// field of view, in degrees
+		public float FOV;
 		// distance from camera to screen (for fov)
 		public float ScreenDistance;
 
 		// initialize the camera
 		public Camera(Vector3 position, Vector3 direction, float fov = 90)
 		{
+			FOV = fov;
 			// calculate the proper screen distance for the given fov
 			float distance = 1 / (float) Math.Tan(( fov * ( Math.PI / 180 ) ) / 2);
 			Position = position;
@@ -554,7 +557,7 @@ namespace Template
 		// recalculate the screen and direction every time this is called
 		public void Update()
 		{
-			Directionchange(x, z);
+			Directionchange(X, Z);
 			CreateScreen();
 		}
 
@@ -567,6 +570,7 @@ namespace Template
 		// set the coordinates of the screen
 		void CreateScreen()
 		{
+			ScreenDistance = 1 / (float) Math.Tan(( FOV * ( Math.PI / 180 ) ) / 2);
 			Screen = new Screen();
 			// vector perpendicular to the up direction (for correct x and z rotation)
 			Vector3 perp = Vector3.Normalize(Vector3.Cross(Direction, new Vector3(0, 1, 0)));
