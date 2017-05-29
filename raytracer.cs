@@ -581,6 +581,8 @@ namespace Template
 			Primitives.Add(temping);
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
 
+            // source of picture gizeh.jpg: http://www.geschichteinchronologie.com/welt/arch-Scott-Onstott-ENGL/ph01-protocol/008-012-great-pyramid-Giza-864-Heliopolis-d/007-interior-stones-great-pyramid.jpg
+
             Triangle temp = new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(0, 1, 2), new Vector3(1, 1, 1));
             temp.Material.Texture = new Texture("../../assets/gizeh.jpg");
             Primitives.Add(temp);
