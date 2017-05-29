@@ -639,7 +639,7 @@ namespace Template
 			// add 2 standard lightsources and 1 spotlight
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
-			LightSources.Add(new Spotlight(new Vector3(0, 0, -1), new Vector3(20f, 20f, 15f), new Vector3(0f, 0, 1), 30));
+			LightSources.Add(new Spotlight(new Vector3(0, 5, 4), new Vector3(20f, 20f, 15f), new Vector3(0f, -1, 0), 60));
 			// add the bottom plane
 			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1));
 			bottom.Material.Texture = new Texture("../../assets/checkers.png");
@@ -652,10 +652,25 @@ namespace Template
 			Primitives.Add(texturedSphere);
 			// add the right (reflective) sphere
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
-			// add triangles
-			Triangle temp = new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(0, 1, 2), new Vector3(1,1,1));
-			temp.Material.Texture = new Texture("../../assets/asdf.png");
-			Primitives.Add(temp);
+			// add the triangles ( a textured pyramid) (source of picture gizeh.jpg: http://www.geschichteinchronologie.com/welt/arch-Scott-Onstott-ENGL/ph01-protocol/008-012-great-pyramid-Giza-864-Heliopolis-d/007-interior-stones-great-pyramid.jpg)
+			Triangle temp1 = new Triangle(new Vector3(1, 3, 3), new Vector3(-1, 3, 3), new Vector3(0, 4, 4), new Vector3(1, 1, 1));
+			temp1.Material.Texture = new Texture("../../assets/gizeh.jpg");
+			Primitives.Add(temp1);
+			Triangle temp2 = new Triangle(new Vector3(-1, 3, 3), new Vector3(-1, 3, 5), new Vector3(0, 4, 4), new Vector3(1, 1, 1));
+			temp2.Material.Texture = new Texture("../../assets/gizeh.jpg");
+			Primitives.Add(temp2);
+			Triangle temp3 = new Triangle(new Vector3(-1, 3, 5), new Vector3(1, 3, 5), new Vector3(0, 4, 4), new Vector3(1, 1, 1));
+			temp3.Material.Texture = new Texture("../../assets/gizeh.jpg");
+			Primitives.Add(temp3);
+			Triangle temp4 = new Triangle(new Vector3(1, 3, 5), new Vector3(1, 3, 3), new Vector3(0, 4, 4), new Vector3(1, 1, 1));
+			temp4.Material.Texture = new Texture("../../assets/gizeh.jpg");
+			Primitives.Add(temp4);
+			Triangle temp5 = new Triangle(new Vector3(1, 3, 3), new Vector3(-1, 3, 3), new Vector3(1, 3, 5), new Vector3(1, 1, 1));
+			temp5.Material.Texture = new Texture("../../assets/gizeh.jpg");
+			Primitives.Add(temp5);
+			Triangle temp6 = new Triangle(new Vector3(-1, 3, 5), new Vector3(1, 3, 5), new Vector3(-1, 3, 3), new Vector3(1, 1, 1));
+			temp6.Material.Texture = new Texture("../../assets/gizeh.jpg");
+			Primitives.Add(temp6);
 		}
 
 		// find the nearest primitive to the origin of the ray
