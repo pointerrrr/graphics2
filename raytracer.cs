@@ -393,7 +393,8 @@ namespace Template
 				
 				float dist =  L.Length;
 				L /= dist;
-				if (Vector3.Dot(N, L) > 0)
+				float NormalDot = Vector3.Dot(N, L);
+				if (NormalDot > 0)
 				{
 					Ray shadowRay = new Ray { Origin = I, Direction = L, Distance = dist };
 					
@@ -406,10 +407,10 @@ namespace Template
 							Spotlight light = (Spotlight)Scene.LightSources[i];
 							float dot = -Vector3.Dot(light.Direction, L);
 							if (dot >= light.Dot && dot > 0)
-								shadows += light.Intensity * Vector3.Dot(N, L) * attenuation;
+								shadows += light.Intensity * NormalDot * attenuation;
 						}
 						else
-							shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
+							shadows += Scene.LightSources[i].Intensity * NormalDot * attenuation;
 					}
 					else
 					{
