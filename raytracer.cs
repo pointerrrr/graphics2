@@ -364,24 +364,8 @@ namespace Template
 					}
 					else
 					{
-						Vector3[,] image = intersect.Primitive.Material.Texture.Image;
-						Vector3 temp = intersect.IntersectionPoint - intersect.IntersectionNormal * intersect.IntersectionPoint.Y;
-						float x, y;
-						x = temp.X % 1;
-						if (x < 0)
-							x = 1 + x;
-						y = temp.Z % 1;
-						if (y < 0)
-							y = 1 + y;
-						if (x >= 1)
-							x = 0;
-						if (x < 0)
-							x = 0;
-						if (y >= 1)
-							y = 0;
-						if (y < 0)
-							y = 0;
-						return image[(int) (x * image.GetLength(0)), (int)(y * image.GetLength(1))] * illumination;
+						return intersect.Primitive.GetTexture(intersect)*illumination;
+						
 					}
 				}
 				
@@ -530,8 +514,9 @@ namespace Template
 		{
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 5f, 5f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 2f, 3f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
@@ -541,9 +526,13 @@ namespace Template
 			
 			Primitives.Add(new Plane(new Vector3(0f, 0f, 7f), new Vector3(0f, 0f, -1f), new Vector3(1, 0, 1)));
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
-			Primitives.Add(new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f,1,0.1f)));
+			Sphere temping = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f, 1, 0.1f));
+			temping.Material.Texture = new Texture("../../assets/sphere.jpg");
+			Primitives.Add(temping);
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
-			Primitives.Add(new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(0, 1, 1)));
+			Triangle temp = new Triangle(new Vector3(1, 0, 1), new Vector3(-1, 0, 1), new Vector3(0, 1, 1));
+			temp.Material.Texture = new Texture("../../assets/asdf.png");
+			//Primitives.Add(temp);
 		}
 
 		public Intersection NearestIntersect(Ray ray)

@@ -23,6 +23,11 @@ namespace Template
 		{
 			return new Vector3(0,0,0);
 		}
+
+		public virtual Vector3 GetTexture(Intersection intersect)
+		{
+			return new Vector3(0, 0, 0);
+		}
 	}
 
 	public class Sphere : Primitive
@@ -82,6 +87,25 @@ namespace Template
 			normal = new Vector3(Vector3.Normalize(IntersectionPoint - Position));
 			return normal;
 		}
+
+		public override Vector3 GetTexture(Intersection intersect)
+		{
+			Vector3 d = Vector3.Normalize( Position - intersect.IntersectionPoint);
+			float u = 0.5f + (float)(Math.Atan2(d.X, d.Z))/(float)(Math.PI*2f);
+			float v = 0.5f - (float)Math.Asin(d.Y)/(float)(Math.PI);
+			if (u >= 1)
+				u = 0;
+			if (u < 0)
+				u = 0;
+			if (v >= 1)
+				v = 0;
+			if (v < 0)
+				v = 0;
+			int iu = (int)(u * Material.Texture.Image.GetLength(0));
+			int iv = (int) ( v * Material.Texture.Image.GetLength(1) );
+
+			return Material.Texture.Image[iu, iv];
+		}
 	}
 
 	public class Plane : Primitive
@@ -116,8 +140,7 @@ namespace Template
 			Intersection result = new Intersection();
 			result.Primitive = this;
 			Vector3 direction = ray.Direction;
-			float denominator;
-			denominator = Vector3.Dot(direction, Normal);
+			float denominator = Vector3.Dot(direction, Normal);
 			if (Math.Abs(denominator) < 0.0001f)
 				return null;
 			float distance = Vector3.Dot(Position - ray.Origin, Normal) / denominator;
@@ -138,23 +161,43 @@ namespace Template
 		{
 			return Normal;
 		}
+
+		public override Vector3 GetTexture(Intersection intersect)
+		{
+			Vector3[,] image = intersect.Primitive.Material.Texture.Image;
+			Vector3 temp = intersect.IntersectionPoint - intersect.IntersectionNormal * intersect.IntersectionPoint.Y;
+			float x, y;
+			x = temp.X % 1;
+			if (x < 0)
+				x = 1 + x;
+			y = temp.Z % 1;
+			if (y < 0)
+				y = 1 + y;
+			if (x >= 1)
+				x = 0;
+			if (x < 0)
+				x = 0;
+			if (y >= 1)
+				y = 0;
+			if (y < 0)
+				y = 0;
+			return image[(int) ( x * image.GetLength(0) ), (int) ( y * image.GetLength(1) )];
+		}
 	}
 
 	public class Triangle : Primitive
 	{
 		public Vector3 p0, p1, p2;
 		public Vector3 Normal;
-		private Plane plane;
 
 		public Triangle(Vector3 v0, Vector3 v1, Vector3 v2)
 		{
 			Material = new Material();
-			Material.Color = new Vector3(1,1,1);
+			Material.Color = new Vector3(1,0,0);
 			p0 = v0;
 			p1 = v1;
 			p2 = v2;
 			Normal = Vector3.Normalize(Vector3.Cross(p1 - p0, p2 - p0));
-			plane = new Plane(p0, Normal);
 		}
 
 		// modified version of https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
@@ -199,12 +242,41 @@ namespace Template
 
 			if (t > 0.0001f)
 			{ //ray intersection
-				result = plane.Intersect(ray);
+				float denominator = Vector3.Dot(ray.Direction, Normal);
+				float distance = Vector3.Dot(p0 - ray.Origin, Normal) / denominator;
+				result.Distance = distance - 0.0001f;
+				if (Vector3.Dot(Normal, ray.Direction) > 0)
+					result.IntersectionNormal = -Normal;
+				else
+					result.IntersectionNormal = Normal;
+				result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
 				return result;
 			}
 
 			// No hit, no win
 			return null;
+		}
+
+		public override Vector3 GetTexture(Intersection intersect)
+		{
+			Vector3[,] image = intersect.Primitive.Material.Texture.Image;
+			Vector3 temp = intersect.IntersectionPoint - intersect.IntersectionNormal * intersect.IntersectionPoint.Y;
+			float x, y;
+			x = temp.X % 1;
+			if (x < 0)
+				x = 1 + x;
+			y = temp.Z % 1;
+			if (y < 0)
+				y = 1 + y;
+			if (x >= 1)
+				x = 0;
+			if (x < 0)
+				x = 0;
+			if (y >= 1)
+				y = 0;
+			if (y < 0)
+				y = 0;
+			return image[(int) ( x * image.GetLength(0) ), (int) ( y * image.GetLength(1) )];
 		}
 	}
 
