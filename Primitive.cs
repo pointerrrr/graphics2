@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 using System.Drawing;
+using System.Threading;
 
 namespace Template
 {
@@ -156,6 +157,7 @@ namespace Template
 			plane = new Plane(p0, Normal);
 		}
 
+		// modified version of https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 		public override Intersection Intersect(Ray ray)
 		{
 			Intersection result = new Intersection();
@@ -226,28 +228,25 @@ namespace Template
 	public class Texture
 	{
 		public Vector3[,] Image { get; set; }
+		public Bitmap bitmap { get { return bitmap; } set {
+				Image = new Vector3[value.Width, value.Height];
+				for (int i = 0; i < value.Width; i++)
+					for (int j = 0; j < value.Height; j++)
+					{
+						Color color = value.GetPixel(i, j);
+						Image[i, j] = new Vector3((float) color.R / 255, (float) color.G / 255, (float) color.B / 255);
+					}
+			} }
 
 		public Texture(Bitmap image)
 		{
-			Image = new Vector3[image.Width, image.Height];
-			for (int i = 0; i < image.Width; i++)
-				for (int j = 0; j < image.Height; j++)
-				{
-					Color color = image.GetPixel(i, j);
-					Image[i, j] = new Vector3((float) color.R / 255, (float) color.G / 255, (float) color.B / 255);
-				}
+			bitmap = image;
 		}
 
 		public Texture(string path)
 		{
 			Bitmap image = new Bitmap(path);
-			Image = new Vector3[image.Width, image.Height];
-			for (int i = 0; i < image.Width; i++)
-				for (int j = 0; j < image.Height; j++)
-				{
-					Color color = image.GetPixel(i, j);
-					Image[i, j] = new Vector3((float) color.R / 255, (float) color.G / 255, (float) color.B / 255);
-				}
+			bitmap = image;
 		}
 	}
 }
