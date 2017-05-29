@@ -399,7 +399,15 @@ namespace Template
 					if (result == null)
 					{
 						float attenuation = 1f / ( dist * dist );
-						shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
+						if (Scene.LightSources[i].GetType() == typeof(Spotlight))
+						{
+							Spotlight light = (Spotlight)Scene.LightSources[i];
+							float dot = -Vector3.Dot(light.Direction, L);
+							if (dot >= light.Dot && dot > 0)
+								shadows += light.Intensity * Vector3.Dot(N, L) * attenuation;
+						}
+						else
+							shadows += Scene.LightSources[i].Intensity * Vector3.Dot(N, L) * attenuation;
 					}
 					else
 					{
@@ -505,6 +513,23 @@ namespace Template
 		public Vector3 Intensity { get; set; }
 	}
 
+	public class Spotlight : LightSource
+	{
+		public Vector3 Direction { get; set; }
+		public float Angle;
+		public float Dot;
+
+		public Spotlight(Vector3 position, Vector3 intensity, Vector3 direction, float angle)
+		{
+			Position = position;
+			Intensity = intensity;
+			Direction = Vector3.Normalize(direction);
+			Angle = angle / 2;
+			Dot = (float)Math.Cos(Angle / 180 * Math.PI);
+		}
+	}
+
+	
 	public class Scene
 	{
 		public List<Primitive> Primitives { get; set; }
@@ -517,6 +542,7 @@ namespace Template
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 2f, 3f) });
+			LightSources.Add(new Spotlight(new Vector3(-8, 0, 3), new Vector3(10f, 0f, 0f), new Vector3(0.5f, 0, 1), 60));
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
