@@ -541,8 +541,8 @@ namespace Template
 			LightSources = new List<LightSource>();
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 2f, 3f) });
-			LightSources.Add(new Spotlight(new Vector3(-8, 0, 3), new Vector3(10f, 0f, 0f), new Vector3(0.5f, 0, 1), 60));
+			//LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 2f, 3f) });
+			LightSources.Add(new Spotlight(new Vector3(0, 0, -1), new Vector3(20f, 20f, 15f), new Vector3(0f, 0, 1), 90));
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 1, 10), Position = new Vector3(0, 6,  8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(10, 1, 10), Position = new Vector3(-2, 2, 8f) });
 			//LightSources.Add(new LightSource { Intensity = new Vector3(1, 10, 10), Position = new Vector3(2, 2, 8f) });
