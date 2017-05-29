@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
  
 namespace Template
@@ -138,14 +136,14 @@ namespace Template
 				pixels[dest + x] = c;
 			}
 		}
-
+		// draw a circle
 		public void Circle(int x1, int y1, int radius, int c)
 		{
 			
 			for(float x = 0 - radius; x < radius; x++)
 				for(float y = 0 - radius; y < radius; y++)
 				{
-					if ((x * x) + (y * y) < radius * radius && ( x * x ) + ( y * y ) > (radius - 2) * (radius - 2))
+					if (x * x + y * y < radius * radius && x * x + y * y > (radius - 2) * (radius - 2))
 					{
 						int xtemp = (int)(x1 + x);
 						int ytemp = (int)(y1 + y);

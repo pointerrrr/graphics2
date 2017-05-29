@@ -1,53 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
 using System.Drawing;
-using System.Threading;
 
 namespace Template
 {
-
-	public class Primitive
+	// base class of all primitives, contains material, intersect function and a function to get what part of the texture should be drawn
+	public abstract class Primitive
 	{
+		// properties all primitives have
 		public Material Material { get; set; }
 
-		public virtual Intersection Intersect(Ray ray)
-		{
-			return null;
-		}
+		// intersect function for override
+		public abstract Intersection Intersect(Ray ray);
 
-		public virtual Vector3 GetNormal(Vector3 IntersectionPoint)
-		{
-			return new Vector3(0,0,0);
-		}
-
-		public virtual Vector3 GetTexture(Intersection intersect)
-		{
-			return new Vector3(0, 0, 0);
-		}
+		// texture function for override
+		public abstract Vector3 GetTexture(Intersection intersect);
 	}
 
+	// sphere primitive
 	public class Sphere : Primitive
 	{
-		
+		// properties unique to sphere
 		public Vector3 Position { get; set; }
 		public float Radius { get; set; }
 
-		public Sphere()
-		{
-			Material = new Material();
-		}
-		
-		public Sphere(Vector3 position, float radius)
-		{
-			Material = new Material();
-			Position = position;
-			Radius = radius;
-		}
-
+		// initialize the sphere
 		public Sphere(Vector3 position, float radius, Vector3 color, bool reflect = false)
 		{
 			Material = new Material();
@@ -57,8 +34,10 @@ namespace Template
 			Material.Reflect = reflect;
 		}
 
+		// adaption of the fast ray - sphere intersect from the slides
 		public override Intersection Intersect(Ray ray)
 		{
+			// setup the result for returning
 			Intersection result = new Intersection();
 			result.Primitive = this;
 			Vector3 centerVector = Position - ray.Origin;
@@ -66,13 +45,16 @@ namespace Template
 			Vector3 yVector = centerVector - xDist * ray.Direction;
 			float psqr = Vector3.Dot(yVector, yVector);
 			float radiussqr = Radius * Radius;
+			// ray does not hit the sphere
 			if (psqr > radiussqr)
 			{
 				return null;
 			}
-			xDist -= (float) Math.Sqrt(radiussqr - psqr);			
+			xDist -= (float) Math.Sqrt(radiussqr - psqr);
+			// check if sphere is behind camera
 			if (xDist > 0)
 			{
+				// distance with correction
 				result.Distance = xDist - 0.0001f;
 				result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
 				result.IntersectionNormal = Vector3.Normalize(result.IntersectionPoint - Position);
@@ -81,13 +63,7 @@ namespace Template
 			return null;			
 		}
 
-		public override Vector3 GetNormal(Vector3 IntersectionPoint)
-		{
-			Vector3 normal;
-			normal = new Vector3(Vector3.Normalize(IntersectionPoint - Position));
-			return normal;
-		}
-
+		// calculations found on http://www.pauldebevec.com/Probes/
 		public override Vector3 GetTexture(Intersection intersect)
 		{
 			Vector3 d = Vector3.Normalize( Position - intersect.IntersectionPoint);
@@ -96,13 +72,10 @@ namespace Template
 			float v = r * d.Y + 1;
 			int iu = (int) ( u * intersect.Primitive.Material.Texture.Image.GetLength(0) / 2) ;
 			int iv = (int) ( v * intersect.Primitive.Material.Texture.Image.GetLength(1) / 2 );
-			if (iu >= intersect.Primitive.Material.Texture.Image.GetLength(0))
+			// fail-safe to make sure the returned value is always within the image
+			if (iu >= intersect.Primitive.Material.Texture.Image.GetLength(0) || iu < 0)
 				iu = 0;
-			if (iu < 0)
-				iu = 0;
-			if (iv >= intersect.Primitive.Material.Texture.Image.GetLength(1))
-				iv = 0;
-			if (iv < 0)
+			if (iv >= intersect.Primitive.Material.Texture.Image.GetLength(1) || iv < 0)
 				iv = 0;
 			return intersect.Primitive.Material.Texture.Image[iu, iv];
 		}
@@ -110,21 +83,11 @@ namespace Template
 
 	public class Plane : Primitive
 	{
+		// properties unique to plane
 		public Vector3 Position { get; set; }
 		public Vector3 Normal { get; set; }
 
-		public Plane()
-		{
-			Material = new Material();
-		}
-
-		public Plane(Vector3 position, Vector3 normal)
-		{
-			Material = new Material();
-			Position = position;
-			Normal = normal;
-		}
-
+		// initialize the plane
 		public Plane(Vector3 position, Vector3 normal, Vector3 color, bool reflect = false)
 		{
 			Material = new Material();
@@ -157,11 +120,6 @@ namespace Template
 			return result;
 		}
 
-		public override Vector3 GetNormal(Vector3 IntersectionPoint)
-		{
-			return Normal;
-		}
-
 		public override Vector3 GetTexture(Intersection intersect)
 		{
 			Vector3[,] image = intersect.Primitive.Material.Texture.Image;
@@ -173,13 +131,10 @@ namespace Template
 			y = temp.Z % 1;
 			if (y < 0)
 				y = 1 + y;
-			if (x >= 1)
+			// fail safe to make sure the pixel is on the image
+			if (x >= 1 || x < 0)
 				x = 0;
-			if (x < 0)
-				x = 0;
-			if (y >= 1)
-				y = 0;
-			if (y < 0)
+			if (y >= 1 || y < 0)
 				y = 0;
 			return image[(int) ( x * image.GetLength(0) ), (int) ( y * image.GetLength(1) )];
 		}
@@ -187,13 +142,16 @@ namespace Template
 
 	public class Triangle : Primitive
 	{
+		// properties unique to triangle
 		public Vector3 p0, p1, p2;
 		public Vector3 Normal;
 
-		public Triangle(Vector3 v0, Vector3 v1, Vector3 v2)
+		// initialize the triangle
+		public Triangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 color, bool reflect = false)
 		{
 			Material = new Material();
-			Material.Color = new Vector3(1,0,0);
+			Material.Color = color;
+			Material.Reflect = reflect;
 			p0 = v0;
 			p1 = v1;
 			p2 = v2;
@@ -242,6 +200,7 @@ namespace Template
 
 			if (t > 0.0001f)
 			{ //ray intersection
+				// checking how long the ray has to travel
 				float denominator = Vector3.Dot(ray.Direction, Normal);
 				float distance = Vector3.Dot(p0 - ray.Origin, Normal) / denominator;
 				result.Distance = distance - 0.0001f;
@@ -252,42 +211,38 @@ namespace Template
 				result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
 				return result;
 			}
-
 			// No hit, no win
 			return null;
 		}
 
+		// essentially the same as plane texture method
 		public override Vector3 GetTexture(Intersection intersect)
 		{
+			
 			Vector3[,] image = intersect.Primitive.Material.Texture.Image;
 			Vector3 temp = intersect.IntersectionPoint - intersect.IntersectionNormal * intersect.IntersectionPoint.Y;
 			float x, y;
+			// the texture will be drawn 
 			x = temp.X % 1;
 			if (x < 0)
 				x = 1 + x;
 			y = temp.Z % 1;
 			if (y < 0)
 				y = 1 + y;
-			if (x >= 1)
+			// fail safe to make sure the pixel is on the image
+			if (x >= 1 || x < 0)
 				x = 0;
-			if (x < 0)
-				x = 0;
-			if (y >= 1)
-				y = 0;
-			if (y < 0)
+			if (y >= 1 || y < 0)
 				y = 0;
 			return image[(int) ( x * image.GetLength(0) ), (int) ( y * image.GetLength(1) )];
 		}
 	}
 
+	// material class for all primitives
 	public class Material
 	{
 		public Vector3 Color { get; set; }
 		public bool Reflect { get; set; }
-		public float ReflectPercentage { get; set; }
-		public bool Refract { get; set; }
-		public float RefractPercentage { get; set; }
-		public float RefractionIndex { get; set; }
 		public Texture Texture { get; set; }
 
 		public Material()
@@ -297,10 +252,29 @@ namespace Template
 		}
 	}
 
+	// skybox for when rays hit nothing
+	public class Skybox
+	{
+		public Texture Texture { get; set; }
+
+		// initialize texture via string
+		public Skybox(string path)
+		{
+			Texture = new Texture(path);
+		}
+	}
+
+	// texture for all primitives
 	public class Texture
 	{
+		// 2d-array of vector3's to make the image accesible in multiple threads
 		public Vector3[,] Image { get; set; }
-		public Bitmap bitmap { get { return bitmap; } set {
+		// bitmap used for final texture (changes the Image array when the bitmap is changed as well)
+		public Bitmap Bitmap
+		{
+			get { return Bitmap; }
+			set
+			{
 				Image = new Vector3[value.Width, value.Height];
 				for (int i = 0; i < value.Width; i++)
 					for (int j = 0; j < value.Height; j++)
@@ -308,32 +282,14 @@ namespace Template
 						Color color = value.GetPixel(i, j);
 						Image[i, j] = new Vector3((float) color.R / 255, (float) color.G / 255, (float) color.B / 255);
 					}
-			} }
-
-		public Texture(Bitmap image)
-		{
-			bitmap = image;
+			}
 		}
 
+		// initialize texture via string
 		public Texture(string path)
 		{
 			Bitmap image = new Bitmap(path);
-			bitmap = image;
-		}
-	}
-
-	public class Skybox
-	{
-		public Texture Texture { get; set; }
-
-		public Skybox(string path)
-		{
-			Texture = new Texture(path);
-		}
-
-		public Skybox(Bitmap image)
-		{
-			Texture = new Texture(image);
+			Bitmap = image;
 		}
 	}
 }

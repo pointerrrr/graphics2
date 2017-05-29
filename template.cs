@@ -13,6 +13,7 @@ namespace Template
 		static int screenID1, screenID2;
 		static Game game;
 		static bool terminated = false;
+
 		protected override void OnLoad( EventArgs e )
 		{
 			// called upon app init
@@ -22,6 +23,7 @@ namespace Template
 			GL.Hint( HintTarget.PerspectiveCorrectionHint, HintMode.Nicest );
 			ClientSize = new Size( 1024, 512 );
 			game = new Game();
+			// initialize screens (for raytracer and debug)
 			game.screen1 = new Surface( Width / 2, Height );
 			game.screen2 = new Surface(Width / 2, Height);
 			Sprite.target = game.screen1;
@@ -47,10 +49,9 @@ namespace Template
 		protected override void OnUpdateFrame( FrameEventArgs e )
 		{
 			// called once per frame; app logic
-			
 			KeyboardState keyboard = OpenTK.Input.Keyboard.GetState();
 			game.Controls(keyboard);
-			if (keyboard[OpenTK.Input.Key.Escape]) this.Exit();
+			if (keyboard[Key.Escape]) this.Exit();
 		}
 		protected override void OnRenderFrame( FrameEventArgs e )
 		{
@@ -61,8 +62,9 @@ namespace Template
 				Exit();
 				return;
 			}
-			// convert Game.screen to OpenGL texture
+			// convert game.screen1 to OpenGL texture
 			GL.BindTexture( TextureTarget.Texture2D, screenID1 );
+			// stream first screen to OpenGL
 			GL.TexImage2D( TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, 
 						   game.screen1.width, game.screen1.height, 0, 
 						   OpenTK.Graphics.OpenGL.PixelFormat.Bgra, 
@@ -75,18 +77,22 @@ namespace Template
 			GL.LoadIdentity();
 			GL.MatrixMode( MatrixMode.Projection );
 			GL.LoadIdentity();
-			// draw screen filling quad
+			// draw the first screen
 			GL.Begin( PrimitiveType.Quads );
 			GL.TexCoord2( 0.0f, 1.0f ); GL.Vertex2( -1.0f, -1.0f );
 			GL.TexCoord2( 1.0f, 1.0f ); GL.Vertex2(  0.0f, -1.0f );
 			GL.TexCoord2( 1.0f, 0.0f ); GL.Vertex2(  0.0f,  1.0f );
 			GL.TexCoord2( 0.0f, 0.0f ); GL.Vertex2( -1.0f,  1.0f );
 			GL.End();
+			// convert game.scree2 to OpenGL texture
+			GL.BindTexture(TextureTarget.Texture2D, screenID2);
+			// stream second screen to )penGL
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
 						   game.screen2.width, game.screen2.height, 0,
 						   OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
 						   PixelType.UnsignedByte, game.screen2.pixels
 						 );
+			// draw the second screen
 			GL.Begin(PrimitiveType.Quads);
 			GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(0.0f, -1.0f);
 			GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(1.0f, -1.0f);
