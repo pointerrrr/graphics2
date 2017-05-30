@@ -725,7 +725,7 @@ namespace Template
 			// add the left (red) sphere
 			Sphere refract = new Sphere(new Vector3(-3f, 0f, 5f), 1.5f, new Vector3(1, 0.1f, 0.1f));
 			refract.Material.Refract = true;
-			refract.Material.RefractionIndex = 2f;
+			refract.Material.RefractionIndex = 1.3f;
 			Primitives.Add(refract);
 			// add the middle (textured) sphere
 			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(1f, 1, 1f), true);

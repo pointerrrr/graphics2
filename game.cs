@@ -2,6 +2,9 @@
 using OpenTK;
 using OpenTK.Input;
 using System.Collections.Generic;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace Template {
 
@@ -215,6 +218,11 @@ namespace Template {
 			{
 				raytracer.DoAA = false;
 			}
+			// printscreen
+			if (NewKeyPress(Key.P))
+			{
+				Printscreen();
+			}
 		}
 
 		// check if a key was pressed this frame
@@ -266,6 +274,23 @@ namespace Template {
 			int bint = (int) ( Math.Min(1, color.Z) * 255 );
 			return ( rint << 16 ) + ( gint << 8 ) + ( bint );
 		}
-	}
 
+		private void Printscreen()
+		{
+			Bitmap bmp = new Bitmap(512, 512);
+			Vector3[,] colors = raytracer.colors;
+			string date = DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss");
+			for (int x = 0; x < 512; x++)
+				for (int y = 0; y < 512; y++)
+				{
+					Color color = Color.FromArgb((int)(Math.Min(255, (colors[x, y].X * 255))), (int)(Math.Min(255, (colors[x, y].Y * 255))), (int)(Math.Min(255, colors[x, y].Z * 255)));
+					bmp.SetPixel(x, y, color);
+				}
+
+			string location = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "/RaytracerPS_" + date + ".jpg";
+			bmp.Save(location, ImageFormat.Jpeg);
+			MessageBox.Show("Screenshot saved at:\n" + location);
+			bmp.Dispose();
+		}
+	}
 } // namespace Template
