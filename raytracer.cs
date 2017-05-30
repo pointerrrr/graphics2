@@ -430,12 +430,12 @@ namespace Template
 					{
 						Ray reflectRay = new Ray();
 						reflectRay.Direction = Reflect(ray.Direction, intersect.IntersectionNormal);
-							return Trace(reflectRay, recursion);
+							return Trace(reflectRay, recursion++);
 					}
 					if (recursion++ > MaxRecursion)
 						return intersect.Primitive.Material.Color;
 					refractray.Origin += ray.Direction*0.002f;
-					Vector3 res = Trace(refractray, recursion, (saverays!=0) ? saverays +2 : 0);
+					Vector3 res = Trace(refractray, recursion++, (saverays!=0) ? saverays +2 : 0);
 					if(saverays == 1 || saverays == 3)
 						refract1.Add(refractray);
 					if (saverays == 2 || saverays == 4)
@@ -502,7 +502,7 @@ namespace Template
 			// check for each lightsource what illumination it adds
 			for (int i = 0; i < Scene.LightSources.Count; i++)
 			{
-				// intersection point
+				// intersection poin
 				Vector3 I = intersection.IntersectionPoint;
 				// vector from intersection point to lightsource
 				Vector3 L = Scene.LightSources[i].Position - I;
@@ -525,14 +525,25 @@ namespace Template
 					{
 						Primitive primitive = intersection.Primitive;
 						float specComponent = 0;
+						Vector3 specVec = new Vector3();
 						// how much of the lightsource is used
 						float attenuation = 1f / (dist * dist);
-
+						Random rand = new Random();
 						if (primitive.Material.SpecularPercentage > 0f)
 						{
 							// Based on: http://www.cs.cornell.edu/courses/cs4620/2012fa/lectures/35raytracing.pdf
 							Vector3 V = -ray.Direction;
 							Vector3 H = Vector3.Normalize(V + L);
+							Ray temp = new Ray();
+							temp.Origin = intersection.IntersectionPoint + 0.001f * intersection.IntersectionNormal;
+							
+							for(int x = 0; x < 32; x++)
+								{
+									temp.Direction = Reflect(ray.Direction, intersection.IntersectionNormal) + new Vector3((float)(rand.NextDouble()/10 - 0.05d), (float) ( rand.NextDouble() / 10 - 0.05d), (float) ( rand.NextDouble() / 10 - 0.05d ));
+									temp.Distance = 1e34f;
+									specVec += Trace(temp, MaxRecursion+1);
+								}
+							specVec /=  32;
 							float specDot = Vector3.Dot(N, H);
 							
 							specComponent = primitive.Material.SpecularPercentage * (float)Math.Pow(Math.Max(0, specDot), primitive.Material.Specularity) * attenuation;
@@ -544,11 +555,11 @@ namespace Template
 							Spotlight light = (Spotlight)Scene.LightSources[i];
 							float dot = -Vector3.Dot(light.Direction, L);
 							if (dot >= light.Dot && dot > 0)
-								shadows += light.Intensity * NormalDot * attenuation * primitive.Material.DiffusePercentage + light.Intensity * specComponent;
+								shadows += light.Intensity * NormalDot * attenuation * primitive.Material.DiffusePercentage + specVec * specComponent * light.Intensity;
 						}
 						// regular light
 						else
-							shadows += Scene.LightSources[i].Intensity * NormalDot * attenuation * primitive.Material.DiffusePercentage + Scene.LightSources[i].Intensity * specComponent;
+							shadows += Scene.LightSources[i].Intensity * NormalDot * attenuation * primitive.Material.DiffusePercentage + specVec * specComponent * Scene.LightSources[i].Intensity;
 					}
 					// we hit something
 					else
@@ -636,7 +647,7 @@ namespace Template
 		// change the direction to the given angles
 		void Directionchange(float x, float z)
 		{
-			Direction = new Vector3((float) Math.Sin(x * Math.PI / 180) * (float) Math.Sin(z * Math.PI / 180), (float) Math.Cos(z * Math.PI / 180), (float) Math.Cos(x * Math.PI / 180) * (float) Math.Sin(z * Math.PI / 180));
+			Direction = Vector3.Normalize(new Vector3((float) Math.Sin(x * Math.PI / 180) * (float) Math.Sin(z * Math.PI / 180), (float) Math.Cos(z * Math.PI / 180), (float) Math.Cos(x * Math.PI / 180) * (float) Math.Sin(z * Math.PI / 180)));
 		}
 
 		// set the coordinates of the screen
@@ -728,15 +739,26 @@ namespace Template
 			refract.Material.RefractionIndex = 1.3f;
 			Primitives.Add(refract);
 			// add the middle (textured) sphere
-			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(1f, 1, 1f), true);
-			texturedSphere.Material.Texture = new Texture("../../assets/globe.jpg");
+			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(1f, 1, 1f), false);
+			//texturedSphere.Material.Texture = new Texture("../../assets/globe.jpg");
 			texturedSphere.Material.ReflectPercentage = 0.1f;
-			texturedSphere.Material.DiffusePercentage = 0.7f;
-			texturedSphere.Material.SpecularPercentage = 0.3f;
+			texturedSphere.Material.DiffusePercentage = 0.5f;
+			texturedSphere.Material.SpecularPercentage = 0.5f;
 			texturedSphere.Material.Specularity = 20;
 			Primitives.Add(texturedSphere);
 			// add the right (reflective) sphere
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
+			
+			/*Sphere diffuse = new Sphere();
+
+			Sphere reflective = new Sphere();
+
+			Sphere textured = new Sphere();
+
+			Sphere glossy = new Sphere();*/
+
+
+
 			// add the triangles ( a textured pyramid) (source of picture gizeh.jpg: http://www.geschichteinchronologie.com/welt/arch-Scott-Onstott-ENGL/ph01-protocol/008-012-great-pyramid-Giza-864-Heliopolis-d/007-interior-stones-great-pyramid.jpg)
 			Triangle temp1 = new Triangle(new Vector3(1, 3, 3), new Vector3(-1, 3, 3), new Vector3(0, 4, 4), new Vector3(1, 1, 1));
 			temp1.Material.Texture = new Texture("../../assets/gizeh.jpg");
