@@ -44,8 +44,6 @@ namespace Template
 			Vector3 yVector;
 			
 			float xDist = Vector3.Dot(centerVector, ray.Direction);
-			if (centerVector.Length < Radius)
-				;
 			yVector = xDist*ray.Direction - centerVector;
 			float psqr = Vector3.Dot(yVector, yVector);
 			float radiussqr = Radius * Radius;
@@ -68,7 +66,7 @@ namespace Template
 			{
 				result.Distance = -( xDist - 0.0001f );
 				result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
-				result.IntersectionNormal = -Vector3.Normalize(result.IntersectionPoint - Position);
+				result.IntersectionNormal = Vector3.Normalize(result.IntersectionPoint - Position);
 				return result;
 			}
 			return null;			
@@ -262,6 +260,7 @@ namespace Template
 		public float ReflectPercentage { get; set; } = 1f;
 		public bool Refract { get; set; }
 		public float RefractPercentage { get; set; } = 1f;
+		public float RefractionIndex { get; set; } = 1f;
 		public Texture Texture { get; set; }
 
 		public Material()

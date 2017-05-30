@@ -385,9 +385,11 @@ namespace Template
 
 		}
 
+		
 		// trace a ray, the three integers are for checking: do we save the reflection ray (and where), do we save the shadow ray (and where) and how far are we in the recursion
-		private Vector3 Trace(Ray ray, int recursion = 0, int shadow = 0, int recurse = 0)
+		private Vector3 Trace(Ray ray, int recursion = 0, int shadow = 0, int recurse = 0, int recur = 0)
 		{
+			
 			// find the first primitive the ray hits
 			Intersection intersect = Scene.NearestIntersect(ray);
 			// if we hit something
@@ -414,6 +416,21 @@ namespace Template
 							return intersect.Primitive.Material.Color* intersect.Primitive.Material.Color* Trace(reflectray, recursion);
 					else
 						return intersect.Primitive.Material.Color;
+				}
+				else if(intersect.Primitive.Material.Refract)
+				{
+					Ray refractray = new Ray {Direction = Refract(intersect, ray), Origin = intersect.IntersectionPoint};
+					if (refractray.Direction.Length == 0)
+					{
+						Ray reflectRay = new Ray();
+						reflectRay.Direction = Reflect(ray.Direction, intersect.IntersectionNormal);
+						return Trace(reflectRay, recursion);
+						
+					}
+					if (recursion++ > MaxRecursion)
+						return intersect.Primitive.Material.Color;
+					refractray.Origin += ray.Direction*0.002f;
+					return Trace(refractray, recursion, shadow, recurse, recur);
 				}
 				// regular ray with shadow
 				else
@@ -443,10 +460,28 @@ namespace Template
 			return direction - 2 * Vector3.Dot(direction, normal) * normal;
 		}
 
-		private Vector3 Refract(Intersection intersect)
+		private Vector3 Refract(Intersection intersect, Ray ray)
 		{
-
-			return new Vector3(0,0,0);
+			Vector3 N = intersect.IntersectionNormal;
+			Vector3 I = ray.Direction;
+			float ior = intersect.Primitive.Material.RefractionIndex;
+			float cosi = Math.Max(-1, Math.Min( 1, Vector3.Dot(I, N)));
+			float etai = 1, etat = ior;
+			Vector3 n = N;
+			if (cosi < 0)
+			{
+				cosi = -cosi;
+			}
+			else
+			{
+				float temp = etai;
+				etai = etat;
+				etat = temp;
+				n = -N;
+			}
+			float eta = etai / etat;
+			float k = 1 - eta * eta * ( 1 - cosi * cosi );
+			return k < 0 ? new Vector3(0,0,0) : eta * I + ( eta * cosi - (float) Math.Sqrt(k) ) * n;
 		}
 
 		// how much is the intersection illuminated (adaptation from the slides)
@@ -663,7 +698,10 @@ namespace Template
 			bottom.Material.Texture = new Texture("../../assets/checkers.png");
 			Primitives.Add(bottom);
 			// add the left (red) sphere
-			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
+			Sphere refract = new Sphere(new Vector3(-3f, 0f, 5f), 1.5f, new Vector3(1, 0.1f, 0.1f));
+			refract.Material.Refract = true;
+			refract.Material.RefractionIndex = 1.3f;
+			Primitives.Add(refract);
 			// add the middle (textured) sphere
 			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(1f, 1, 1f), true);
 			texturedSphere.Material.Texture = new Texture("../../assets/globe.jpg");
