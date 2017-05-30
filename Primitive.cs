@@ -34,6 +34,14 @@ namespace Template
 			Material.Reflect = reflect;
 		}
 
+		public Sphere(Vector3 position, float radius, Vector3 color, float diffusePercentage, float specularity)
+		{
+			Material = new Material(diffusePercentage);
+			Material.Specularity = specularity;
+			Position = position;
+			Radius = radius;
+			Material.Color = color;
+		}
 		// adaptation of the fast ray - sphere intersect from the slides
 		public override Intersection Intersect(Ray ray)
 		{
@@ -249,12 +257,22 @@ namespace Template
 		public Vector3 Color { get; set; }
 		public bool Reflect { get; set; }
 		public float ReflectPercentage { get; set; } = 1f;
+		public float DiffusePercentage { get; set; } = 1f;
+		public float SpecularPercentage { get; set; } = 0f;
+		public float Specularity { get; set; } = 1f;
 		public Texture Texture { get; set; }
 
 		public Material()
 		{
 			Color = new Vector3(1,1,1);
 			Reflect = false;
+		}
+		public Material(float diffusePercentage)
+		{
+			Color = new Vector3(1, 1, 1);
+			Reflect = false;
+			DiffusePercentage = diffusePercentage;
+			SpecularPercentage = 1.0f - DiffusePercentage;
 		}
 	}
 
