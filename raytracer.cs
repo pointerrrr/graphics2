@@ -708,22 +708,21 @@ namespace Template
 			LightSources.Add(new Spotlight(new Vector3(0, 5, 4), new Vector3(20f, 20f, 15f), new Vector3(0f, -1, 0), 60));
 			LightSources.Add(new LightSource { Intensity = new Vector3(50f, 50f, 45f), Position = new Vector3(-8f, 5f, 1f) });
 			// add the bottom plane
-			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1));
+			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1), true);
 			bottom.Material.Texture = new Texture("../../assets/checkers.png");
+			bottom.Material.ReflectPercentage = 0.3f;
 			Primitives.Add(bottom);
 			// add the left (red) sphere
-
 			Sphere refract = new Sphere(new Vector3(-3f, 0f, 5f), 1.5f, new Vector3(1, 0.1f, 0.1f));
 			refract.Material.Refract = true;
 			refract.Material.RefractionIndex = 1.3f;
 			Primitives.Add(refract);
-
 			// add the middle (textured) sphere
 			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(1f, 1, 1f), true);
 			texturedSphere.Material.Texture = new Texture("../../assets/globe.jpg");
 			texturedSphere.Material.ReflectPercentage = 0.1f;
-			texturedSphere.Material.DiffusePercentage = 0.3f;
-			texturedSphere.Material.SpecularPercentage = 0.7f;
+			texturedSphere.Material.DiffusePercentage = 0.7f;
+			texturedSphere.Material.SpecularPercentage = 0.3f;
 			texturedSphere.Material.Specularity = 20;
 			Primitives.Add(texturedSphere);
 			// add the right (reflective) sphere
