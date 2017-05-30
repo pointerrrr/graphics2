@@ -49,4 +49,5 @@ ray - triangle intersection: https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93T
 skybox implementation: http://www.pauldebevec.com/Probes/
 Sphere and skybox texture: http://www.pauldebevec.com/Probes/
 pyramid texture: http://www.geschichteinchronologie.com/welt/arch-Scott-Onstott-ENGL/ph01-protocol/008-012-great-pyramid-Giza-864-Heliopolis-d/007-interior-stones-great-pyramid.jpg
+refraction from: https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
 A whole lot of the vector math was taken from the slides.

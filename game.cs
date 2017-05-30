@@ -219,7 +219,7 @@ namespace Template {
 				raytracer.DoAA = false;
 			}
 			// printscreen
-			if (NewKeyPress(Key.P))
+			if (NewKeyPress(Key.I))
 			{
 				Printscreen();
 			}
