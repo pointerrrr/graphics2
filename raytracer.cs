@@ -413,7 +413,7 @@ namespace Template
 					// are we within the recursion limit
 					if (recursion++ < MaxRecursion)
 						if(intersect.Primitive.Material.ReflectPercentage < 1)
-						return intersect.Primitive.Material.Color * intersect.Primitive.Material.Color * Trace(reflectray, recursion) * intersect.Primitive.Material.ReflectPercentage + intersect.Primitive.Material.Color * Illumination(intersect) * ( 1 - intersect.Primitive.Material.ReflectPercentage);
+						return intersect.Primitive.Material.Color * intersect.Primitive.Material.Color * Trace(reflectray, recursion) * intersect.Primitive.Material.ReflectPercentage + intersect.Primitive.Material.Color * intersect.Primitive.GetTexture(intersect) * Illumination(intersect) * ( 1 - intersect.Primitive.Material.ReflectPercentage);
 						else
 							return intersect.Primitive.Material.Color* intersect.Primitive.Material.Color* Trace(reflectray, recursion);
 					else
@@ -656,9 +656,9 @@ namespace Template
 			// add the left (red) sphere
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
 			// add the middle (textured) sphere
-			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f, 1, 0.1f), true);
-			texturedSphere.Material.Texture = new Texture("../../assets/uffizi_probe.jpg");
-			texturedSphere.Material.ReflectPercentage = 0.3f;
+			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(1f, 1, 1f), true);
+			texturedSphere.Material.Texture = new Texture("../../assets/globe.jpg");
+			texturedSphere.Material.ReflectPercentage = 0.1f;
 			Primitives.Add(texturedSphere);
 			// add the right (reflective) sphere
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));

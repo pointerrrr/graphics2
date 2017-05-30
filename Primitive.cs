@@ -68,7 +68,9 @@ namespace Template
 		{
 			// direction of vector for finding coordinates
 			Vector3 d = Vector3.Normalize( Position - intersect.IntersectionPoint);
-			float r = (float) ( ( 1d / Math.PI ) * Math.Acos(d.Z) / Math.Sqrt(d.X * d.X + d.Y * d.Y) );
+			// make sure the north-pole of the globe is actually the north pole on the sphere
+			d = new Vector3(d.Z, -d.X, -d.Y);
+			float r = (float) ( 1d / Math.PI * Math.Acos(d.Z) / Math.Sqrt(d.X * d.X + d.Y * d.Y) );
 			// finding the coordinates
 			float u = r * d.X + 1;
 			float v = r * d.Y + 1;
