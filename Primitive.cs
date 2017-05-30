@@ -41,8 +41,12 @@ namespace Template
 			Intersection result = new Intersection();
 			result.Primitive = this;
 			Vector3 centerVector = Position - ray.Origin;
-			float xDist = ( Vector3.Dot(centerVector, ray.Direction));
-			Vector3 yVector = centerVector - xDist * ray.Direction;
+			Vector3 yVector;
+			
+			float xDist = Vector3.Dot(centerVector, ray.Direction);
+			if (centerVector.Length < Radius)
+				;
+			yVector = xDist*ray.Direction - centerVector;
 			float psqr = Vector3.Dot(yVector, yVector);
 			float radiussqr = Radius * Radius;
 			// ray does not hit the sphere
@@ -52,12 +56,19 @@ namespace Template
 			}
 			xDist -= (float) Math.Sqrt(radiussqr - psqr);
 			// check if sphere is behind camera
-			if (xDist > 0)
+			if (xDist > 0 )
 			{
 				// distance with correction
 				result.Distance = xDist - 0.0001f;
 				result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
 				result.IntersectionNormal = Vector3.Normalize(result.IntersectionPoint - Position);
+				return result;
+			}
+			if( centerVector.Length < Radius)
+			{
+				result.Distance = -( xDist - 0.0001f );
+				result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
+				result.IntersectionNormal = -Vector3.Normalize(result.IntersectionPoint - Position);
 				return result;
 			}
 			return null;			
@@ -249,6 +260,8 @@ namespace Template
 		public Vector3 Color { get; set; }
 		public bool Reflect { get; set; }
 		public float ReflectPercentage { get; set; } = 1f;
+		public bool Refract { get; set; }
+		public float RefractPercentage { get; set; } = 1f;
 		public Texture Texture { get; set; }
 
 		public Material()

@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
 using System.Threading;
 using OpenTK;
 
@@ -447,6 +443,12 @@ namespace Template
 			return direction - 2 * Vector3.Dot(direction, normal) * normal;
 		}
 
+		private Vector3 Refract(Intersection intersect)
+		{
+
+			return new Vector3(0,0,0);
+		}
+
 		// how much is the intersection illuminated (adaptation from the slides)
 		private Vector3 Illumination(Intersection intersection, int shadow = 0)
 		{
@@ -557,6 +559,13 @@ namespace Template
 			Direction = direction;
 			ScreenDistance = distance;
 			CreateScreen();
+		}
+
+		public void LookAt(Vector3 position)
+		{
+			Vector3 temp = Vector3.Normalize(position - Position);
+			Z = (float)(Math.Acos(temp.Y) / (Math.PI/180));
+			X = (float) (Math.Acos(temp.X / Math.Sin(Z * Math.PI / 180)) /(Math.PI/180));
 		}
 
 		// recalculate the screen and direction every time this is called
