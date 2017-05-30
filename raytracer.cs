@@ -483,12 +483,11 @@ namespace Template
 
 						if (primitive.Material.SpecularPercentage > 0f)
 						{
+							// Based on: http://www.cs.cornell.edu/courses/cs4620/2012fa/lectures/35raytracing.pdf
 							Vector3 V = -ray.Direction;
 							Vector3 H = Vector3.Normalize(V + L);
 							float specDot = Vector3.Dot(N, H);
-							/*Vector3 R = Vector3.Normalize(L - 2 * NormalDot * N);
-							float specDot = Vector3.Dot(V, R);*/
-
+							
 							specComponent = primitive.Material.SpecularPercentage * (float)Math.Pow(Math.Max(0, specDot), primitive.Material.Specularity) * attenuation;
 						}
 
