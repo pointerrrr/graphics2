@@ -713,17 +713,31 @@ namespace Template
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
 			// add 2 standard lightsources and 1 spotlight
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 5f, 5f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 2f, 4f) });
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0.3f, 0f, -1f) });
 			LightSources.Add(new Spotlight(new Vector3(0, 5, 4), new Vector3(20f, 20f, 15f), new Vector3(0f, -1, 0), 60));
-			LightSources.Add(new LightSource { Intensity = new Vector3(50f, 50f, 45f), Position = new Vector3(-8f, 5f, 1f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(50f, 50f, 45f), Position = new Vector3(-8f, 5f, 6f) });
 			// add the bottom plane
 			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1), true);
 			bottom.Material.Texture = new Texture("../../assets/checkers.png");
 			bottom.Material.ReflectPercentage = 0.3f;
 			Primitives.Add(bottom);
 			// add the left (red) sphere
-			Sphere refract = new Sphere(new Vector3(-3f, 0f, 5f), 1.5f, new Vector3(1, 0.1f, 0.1f));
+			Sphere diffuse = new Sphere(new Vector3(0, 0, 6.5f), 1.5f, new Vector3(1, 0, 0));
+			Sphere reflective = new Sphere(new Vector3(-3, 0, 4.5f), 1.5f, new Vector3(1, 1, 1), true);
+			Sphere texture = new Sphere(new Vector3(3, 0, 4.5f), 1.5f, new Vector3(1, 1, 1));
+			texture.Material.Texture = new Texture("../../assets/globe.jpg");
+			Sphere refractive = new Sphere(new Vector3(2, 0, 1.5f), 1.5f, new Vector3(1, 1, 1));
+			refractive.Material.Refract = true;
+			refractive.Material.RefractionIndex = 1.3f;
+			Sphere specular = new Sphere(new Vector3(-2, 0, 1.5f), 1.5f, new Vector3(1, 1, 1), 0.5f, 20);
+			Primitives.Add(diffuse);
+			Primitives.Add(reflective);
+			Primitives.Add(texture);
+			Primitives.Add(refractive);
+			Primitives.Add(specular);
+
+			/*Sphere refract = new Sphere(new Vector3(-3f, 0f, 5f), 1.5f, new Vector3(1, 0.1f, 0.1f));
 			refract.Material.Refract = true;
 			refract.Material.RefractionIndex = 1.3f;
 			Primitives.Add(refract);
@@ -736,7 +750,7 @@ namespace Template
 			texturedSphere.Material.Specularity = 20;
 			Primitives.Add(texturedSphere);
 			// add the right (reflective) sphere
-			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
+			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));*/
 			// add the triangles ( a textured pyramid) (source of picture gizeh.jpg: http://www.geschichteinchronologie.com/welt/arch-Scott-Onstott-ENGL/ph01-protocol/008-012-great-pyramid-Giza-864-Heliopolis-d/007-interior-stones-great-pyramid.jpg)
 			Triangle temp1 = new Triangle(new Vector3(1, 3, 3), new Vector3(-1, 3, 3), new Vector3(0, 4, 4), new Vector3(1, 1, 1));
 			temp1.Material.Texture = new Texture("../../assets/gizeh.jpg");
