@@ -51,7 +51,7 @@ namespace Template {
 			screen2.Print("Smoothdraw:" + raytracer.Smoothdraw, 2, 32, RGB(1, 1, 0));
 			screen2.Print("FOV:" + raytracer.Camera.FOV, 2, 47, RGB(1, 1, 0));
 			// draw the primary rays in white
-			for (int x = 0; x < 512; x += 10)
+			for (int x = 0; x < 512; x ++)
 			{
 				if (raytracer.rays.Count > x)
 				{
@@ -63,7 +63,7 @@ namespace Template {
 				}
 			}
 			// draw the shadow rays in red
-			for (int i = 0; i < raytracer.shadowrays.Count; i += 10)
+			for (int i = 0; i < raytracer.shadowrays.Count; i++)
 			{
 				Ray shadowRay = raytracer.shadowrays[i];
 				if (shadowRay != null)
@@ -73,13 +73,23 @@ namespace Template {
 				}
 			}
 			// draw the secondary rays in cyan
-			for (int i = 0; i < raytracer.reflectrays.Count; i += 10)
+			for (int i = 0; i < raytracer.reflectrays.Count; i++)
 			{
 				Ray reflectRay = raytracer.reflectrays[i];
 				if (reflectRay != null)
 				{
 					Vector3 point2S = (reflectRay.Direction*Math.Min(reflectRay.Distance, 100)) + reflectRay.Origin;
-					screen2.Line(TX(point2S.X), TZ(point2S.Z), TX(reflectRay.Origin.X), TZ(reflectRay.Origin.Z), RGB(0, 1f, 1));
+					screen2.Line(TX(point2S.X), TZ(point2S.Z), TX(reflectRay.Origin.X), TZ(reflectRay.Origin.Z), RGB(0, 1, 1));
+				}
+			}
+			// draw the refraction rays in green
+			for (int i = 0; i < raytracer.refractrays.Count; i++)
+			{
+				Ray refractRay = raytracer.refractrays[i];
+				if (refractRay != null)
+				{
+					Vector3 point2S = ( refractRay.Direction * Math.Min(refractRay.Distance, 100) ) + refractRay.Origin;
+					screen2.Line(TX(point2S.X), TZ(point2S.Z), TX(refractRay.Origin.X), TZ(refractRay.Origin.Z), RGB(0, 1, 0));
 				}
 			}
 			// draw the primitives

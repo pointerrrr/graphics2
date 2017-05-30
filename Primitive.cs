@@ -49,16 +49,22 @@ namespace Template
 			Intersection result = new Intersection();
 			result.Primitive = this;
 			Vector3 centerVector = Position - ray.Origin;
-			Vector3 yVector;
-			
 			float xDist = Vector3.Dot(centerVector, ray.Direction);
-			yVector = xDist*ray.Direction - centerVector;
+			Vector3 yVector = xDist*ray.Direction - centerVector;
 			float psqr = Vector3.Dot(yVector, yVector);
 			float radiussqr = Radius * Radius;
 			// ray does not hit the sphere
 			if (psqr > radiussqr)
 			{
 				return null;
+			}
+			if (centerVector.Length < Radius)
+			{
+				xDist +=  (float) Math.Sqrt(radiussqr - psqr);
+				result.Distance = xDist - 0.0001f;
+				result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
+				result.IntersectionNormal = Vector3.Normalize(result.IntersectionPoint - Position);
+				return result;
 			}
 			xDist -= (float) Math.Sqrt(radiussqr - psqr);
 			// check if sphere is behind camera
@@ -70,13 +76,7 @@ namespace Template
 				result.IntersectionNormal = Vector3.Normalize(result.IntersectionPoint - Position);
 				return result;
 			}
-			if( centerVector.Length < Radius)
-			{
-				result.Distance = -( xDist - 0.0001f );
-				result.IntersectionPoint = result.Distance * ray.Direction + ray.Origin;
-				result.IntersectionNormal = Vector3.Normalize(result.IntersectionPoint - Position);
-				return result;
-			}
+			
 			return null;			
 		}
 

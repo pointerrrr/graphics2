@@ -17,7 +17,7 @@ namespace Template
 		// 5 lists of colors (1 for the total, 4 for the 4 seperate threads)
 		public Vector3[,] colors = new Vector3[512, 512], colors1 = new Vector3[256, 256], colors2 = new Vector3[256, 256], colors3 = new Vector3[256, 256], colors4 = new Vector3[256, 256];
 		// list of primary rays, shadow rays and secondary rays
-		public List<Ray> rays = new List<Ray>(), shadowrays = new List<Ray>(), rays1 = new List<Ray>(), rays2 = new List<Ray>(), shadowrays1 = new List<Ray>(), shadowrays2 = new List<Ray>(), reflectrays = new List<Ray>(), reflect1 = new List<Ray>(), reflect2 = new List<Ray>();
+		public List<Ray> rays = new List<Ray>(), shadowrays = new List<Ray>(), rays1 = new List<Ray>(), rays2 = new List<Ray>(), shadowrays1 = new List<Ray>(), shadowrays2 = new List<Ray>(), reflectrays = new List<Ray>(), reflect1 = new List<Ray>(), reflect2 = new List<Ray>(), refractrays = new List<Ray>(), refract1 = new List<Ray>(), refract2 = new List<Ray>();
 		// float for field of view (in degrees)
 		public float FOV = 90;
 		// are we drawing all pixels, or just half for speed
@@ -77,6 +77,9 @@ namespace Template
 			reflect1.Clear();
 			reflect2.Clear();
 			reflectrays.Clear();
+			refract1.Clear();
+			refract2.Clear();
+			refractrays.Clear();
 		}
 
 		// start the rendering threads
@@ -119,6 +122,9 @@ namespace Template
 			// merge reflect1 and reflect2 into reflectrays for drawing secondary rays in debug view
 			reflectrays.AddRange(reflect1);
 			reflectrays.AddRange(reflect2);
+			// merge reflect1 and reflect2 into reflectrays for drawing secondary rays in debug view
+			refractrays.AddRange(refract1);
+			refractrays.AddRange(refract2);
 		}
 
 		// merge the 4 quarters of the screen into one
@@ -283,10 +289,10 @@ namespace Template
 						ray = new Ray();
 						ray.Origin = Camera.Position;
 						ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-						if (y == 0)
+						if (x % 10 == 1 && y == 0)
 						{
 							rays1.Add(ray);
-							colors3[(int) x, (int) y] = Trace(ray, 0, 1, 1);
+							colors3[(int) x, (int) y] = Trace(ray, 0, 1);
 						}
 						else
 							colors3[(int) x, (int) y] = Trace(ray);
@@ -305,9 +311,9 @@ namespace Template
 								ray = new Ray();
 								ray.Origin = Camera.Position;
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-								int saverays = (y == 0 && i == 0 && j == 0) ? 1 : 0;
-								avg[(int) i, (int) j] = Trace(ray, 0, saverays, saverays);
-								if (i == 0 && j == 0 && y == 0)
+								int saverays = x % 10 == 1 && y  == 0 && i == 0 && j == 0 ? 1 : 0;
+								avg[(int) i, (int) j] = Trace(ray, 0, saverays);
+								if (i == 0 && j == 0 && x % 10 == 1 && y == 0)
 									rays1.Add(ray);
 							}
 						}
@@ -342,10 +348,10 @@ namespace Template
 						ray = new Ray();
 						ray.Origin = Camera.Position;
 						ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-						if (y == 0)
+						if (x % 10 == 1 && y == 0)
 						{
 							rays2.Add(ray);
-							colors4[(int) x, (int) y] = Trace(ray, 0, 2, 2);
+							colors4[(int) x, (int) y] = Trace(ray, 0, 2);
 						}
 						else
 							colors4[(int) x, (int) y] = Trace(ray);
@@ -364,9 +370,9 @@ namespace Template
 								ray = new Ray();
 								ray.Origin = Camera.Position;
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-								int saverays = ( y == 0 && i == 0 && j == 0 ) ? 2 : 0;
-								avg[(int) i, (int) j] = Trace(ray, 0, saverays, saverays);
-								if (i == 0 && j == 0 && y == 0)
+								int saverays = x % 10 == 1 && y == 0 && i == 0 && j  == 0 ? 2 : 0;
+								avg[(int) i, (int) j] = Trace(ray, 0, saverays);
+								if (i == 0 && j == 0 && y == 0 && x % 10 == 1)
 									rays2.Add(ray);
 							}
 						}
@@ -387,7 +393,7 @@ namespace Template
 
 		
 		// trace a ray, the three integers are for checking: do we save the reflection ray (and where), do we save the shadow ray (and where) and how far are we in the recursion
-		private Vector3 Trace(Ray ray, int recursion = 0, int shadow = 0, int recurse = 0, int recur = 0)
+		private Vector3 Trace(Ray ray, int recursion = 0, int saverays = 0)
 		{
 			
 			// find the first primitive the ray hits
@@ -403,15 +409,15 @@ namespace Template
 					reflectray.Direction = Reflect(ray.Direction, intersect.IntersectionNormal);
 					reflectray.Origin = intersect.IntersectionPoint + reflectray.Direction * 0.01f;
 					// do we save this ray in reflect1
-					if (recurse == 1)
+					if (saverays == 1)
 						reflect1.Add(reflectray);
 					// do we save this ray in reflect2
-					if (recurse == 2)
+					if (saverays == 2)
 						reflect2.Add(reflectray);
 					// are we within the recursion limit
 					if (recursion++ < MaxRecursion)
 						if(intersect.Primitive.Material.ReflectPercentage < 1)
-						return intersect.Primitive.Material.Color * intersect.Primitive.Material.Color * Trace(reflectray, recursion) * intersect.Primitive.Material.ReflectPercentage + intersect.Primitive.Material.Color * intersect.Primitive.GetTexture(intersect) * Illumination(intersect, ray) * ( 1 - intersect.Primitive.Material.ReflectPercentage);
+							return intersect.Primitive.Material.Color * intersect.Primitive.Material.Color * Trace(reflectray, recursion) * intersect.Primitive.Material.ReflectPercentage + intersect.Primitive.Material.Color * intersect.Primitive.GetTexture(intersect) * Illumination(intersect, ray, saverays) * ( 1 - intersect.Primitive.Material.ReflectPercentage);
 						else
 							return intersect.Primitive.Material.Color* intersect.Primitive.Material.Color* Trace(reflectray, recursion);
 					else
@@ -424,19 +430,23 @@ namespace Template
 					{
 						Ray reflectRay = new Ray();
 						reflectRay.Direction = Reflect(ray.Direction, intersect.IntersectionNormal);
-						return Trace(reflectRay, recursion);
-						
+							return Trace(reflectRay, recursion);
 					}
 					if (recursion++ > MaxRecursion)
 						return intersect.Primitive.Material.Color;
-					refractray.Origin += ray.Direction*0.002f;
-					return Trace(refractray, recursion, shadow, recurse, recur);
+					refractray.Origin += ray.Direction*0.02f;
+					Vector3 res = Trace(refractray, recursion, (saverays!=0) ? saverays +2 : 0);
+					if(saverays == 1 || saverays == 3)
+						refract1.Add(refractray);
+					if (saverays == 2 || saverays == 4)
+						refract2.Add(refractray);
+					return res;
 				}
 				// regular ray with shadow
 				else
 				{
 					// illumination of the point we hit
-					Vector3 illumination = Illumination(intersect, ray, shadow);
+					Vector3 illumination = Illumination(intersect, ray, saverays);
 					// no texture
 					if (intersect.Primitive.Material.Texture == null)
 					{
@@ -703,7 +713,7 @@ namespace Template
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
 			// add 2 standard lightsources and 1 spotlight
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 5f, 5f) });
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0.3f, 0f, -1f) });
 			LightSources.Add(new Spotlight(new Vector3(0, 5, 4), new Vector3(20f, 20f, 15f), new Vector3(0f, -1, 0), 60));
 			LightSources.Add(new LightSource { Intensity = new Vector3(50f, 50f, 45f), Position = new Vector3(-8f, 5f, 1f) });
@@ -746,6 +756,10 @@ namespace Template
 			Triangle temp6 = new Triangle(new Vector3(-1, 3, 5), new Vector3(1, 3, 5), new Vector3(-1, 3, 3), new Vector3(1, 1, 1));
 			temp6.Material.Texture = new Texture("../../assets/gizeh.jpg");
 			Primitives.Add(temp6);
+			/*
+			Sphere temp = new Sphere(new Vector3(0, 0, 5), 3f, new Vector3(1, 1, 1));
+			temp.Material.Texture = new Texture("../../assets/globe.jpg");
+			Primitives.Add(temp);*/
 		}
 
 		// find the nearest primitive to the origin of the ray
