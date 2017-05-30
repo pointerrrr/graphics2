@@ -411,7 +411,7 @@ namespace Template
 					// are we within the recursion limit
 					if (recursion++ < MaxRecursion)
 						if(intersect.Primitive.Material.ReflectPercentage < 1)
-						return intersect.Primitive.Material.Color * intersect.Primitive.Material.Color * Trace(reflectray, recursion) * intersect.Primitive.Material.ReflectPercentage + intersect.Primitive.Material.Color * intersect.Primitive.GetTexture(intersect) * Illumination(intersect) * ( 1 - intersect.Primitive.Material.ReflectPercentage);
+						return intersect.Primitive.Material.Color * intersect.Primitive.Material.Color * Trace(reflectray, recursion) * intersect.Primitive.Material.ReflectPercentage + intersect.Primitive.Material.Color * intersect.Primitive.GetTexture(intersect) * Illumination(intersect, ray) * ( 1 - intersect.Primitive.Material.ReflectPercentage);
 						else
 							return intersect.Primitive.Material.Color* intersect.Primitive.Material.Color* Trace(reflectray, recursion);
 					else
@@ -436,7 +436,7 @@ namespace Template
 				else
 				{
 					// illumination of the point we hit
-					Vector3 illumination = Illumination(intersect, shadow);
+					Vector3 illumination = Illumination(intersect, ray, shadow);
 					// no texture
 					if (intersect.Primitive.Material.Texture == null)
 					{
@@ -485,7 +485,7 @@ namespace Template
 		}
 
 		// how much is the intersection illuminated (adaptation from the slides)
-		private Vector3 Illumination(Intersection intersection, int shadow = 0)
+		private Vector3 Illumination(Intersection intersection, Ray ray, int shadow = 0)
 		{
 			// what we will return
 			Vector3 shadows = new Vector3(0, 0, 0);
@@ -513,19 +513,32 @@ namespace Template
 					// did we hit anything
 					if (result == null)
 					{
+						Primitive primitive = intersection.Primitive;
+						float specComponent = 0;
 						// how much of the lightsource is used
-						float attenuation = 1f / ( dist * dist );
+						float attenuation = 1f / (dist * dist);
+
+						if (primitive.Material.SpecularPercentage > 0f)
+						{
+							// Based on: http://www.cs.cornell.edu/courses/cs4620/2012fa/lectures/35raytracing.pdf
+							Vector3 V = -ray.Direction;
+							Vector3 H = Vector3.Normalize(V + L);
+							float specDot = Vector3.Dot(N, H);
+							
+							specComponent = primitive.Material.SpecularPercentage * (float)Math.Pow(Math.Max(0, specDot), primitive.Material.Specularity) * attenuation;
+						}
+
 						// check for spotlights
 						if (Scene.LightSources[i].GetType() == typeof(Spotlight))
 						{
 							Spotlight light = (Spotlight)Scene.LightSources[i];
 							float dot = -Vector3.Dot(light.Direction, L);
 							if (dot >= light.Dot && dot > 0)
-								shadows += light.Intensity * NormalDot * attenuation;
+								shadows += light.Intensity * NormalDot * attenuation * primitive.Material.DiffusePercentage + light.Intensity * specComponent;
 						}
 						// regular light
 						else
-							shadows += Scene.LightSources[i].Intensity * NormalDot * attenuation;
+							shadows += Scene.LightSources[i].Intensity * NormalDot * attenuation * primitive.Material.DiffusePercentage + Scene.LightSources[i].Intensity * specComponent;
 					}
 					// we hit something
 					else
@@ -691,21 +704,27 @@ namespace Template
 			LightSources = new List<LightSource>();
 			// add 2 standard lightsources and 1 spotlight
 			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0.3f, 0f, -1f) });
 			LightSources.Add(new Spotlight(new Vector3(0, 5, 4), new Vector3(20f, 20f, 15f), new Vector3(0f, -1, 0), 60));
+			LightSources.Add(new LightSource { Intensity = new Vector3(50f, 50f, 45f), Position = new Vector3(-8f, 5f, 1f) });
 			// add the bottom plane
 			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1));
 			bottom.Material.Texture = new Texture("../../assets/checkers.png");
 			Primitives.Add(bottom);
 			// add the left (red) sphere
+
 			Sphere refract = new Sphere(new Vector3(-3f, 0f, 5f), 1.5f, new Vector3(1, 0.1f, 0.1f));
 			refract.Material.Refract = true;
 			refract.Material.RefractionIndex = 1.3f;
 			Primitives.Add(refract);
+
 			// add the middle (textured) sphere
 			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(1f, 1, 1f), true);
 			texturedSphere.Material.Texture = new Texture("../../assets/globe.jpg");
 			texturedSphere.Material.ReflectPercentage = 0.1f;
+			texturedSphere.Material.DiffusePercentage = 0.3f;
+			texturedSphere.Material.SpecularPercentage = 0.7f;
+			texturedSphere.Material.Specularity = 20;
 			Primitives.Add(texturedSphere);
 			// add the right (reflective) sphere
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
