@@ -1,7 +1,7 @@
 Students:
 Gideon Ogilvie      5936373
 Lennart van Koot    5923395
-Mike Knoop          6052703
+Mike Knoop          5853915
 
 A small description of our raytracer:
 When you start the raytracer, you will see a scene consisting of: 3 spheres (one red, one textured and one reflective), 1 plane (textured), 6 triangles ( textured, in the shape of a pyramid).
@@ -30,14 +30,16 @@ Increase FOV: P
 Decrease FOV: O
 Increase recursion depth: Comma
 Decrease recursion depth: Period
+Screenshot: I (located in My Pictures)
 
 Implemented bonus assignments:
 1. Triangle support             ( we added a pyramid to show this)
 2. Spotlights                   ( the spotlight is aimed directly at the pyramid. Most of the spotlights light is caught by the pyramid, but some leaks past the sides)
 3. Anti-aliasing                ( to enable this, hold T for at least 1 frame. To disable it again: hold Y )
 4. Textures on all primitives   ( the floor plane has a checkerboard pattern, the middle sphere has a skybox as texture and the triangles have a brick texture)
-5. A skydome                    ( one of the skydomes of http://www.pauldebevec.com/Probes/ has been implemented)
-6. Refraction                   ( the sphere on the left has a refraction index of 1.3)
+5. Glossy reflections           ( the sphere in the middle has glossy reflections)
+6. A skydome                    ( one of the skydomes of http://www.pauldebevec.com/Probes/ has been implemented)
+7. Refraction                   ( the sphere on the left has a refraction index of 1.3)
 
 Sources (if i forgot something, there is a chance it is listed as a source in the comments at the appropriate place):
 ray - sphere intersection: adaptation from the slides
