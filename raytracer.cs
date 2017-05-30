@@ -484,9 +484,12 @@ namespace Template
 						if (primitive.Material.SpecularPercentage > 0f)
 						{
 							Vector3 V = -ray.Direction;
-							Vector3 R = Vector3.Normalize(L - 2 * NormalDot * N);
-							float specDot = Vector3.Dot(V, R);
-							specComponent = primitive.Material.SpecularPercentage * (float)Math.Pow(specDot, primitive.Material.Specularity) * attenuation;
+							Vector3 H = Vector3.Normalize(V + L);
+							float specDot = Vector3.Dot(N, H);
+							/*Vector3 R = Vector3.Normalize(L - 2 * NormalDot * N);
+							float specDot = Vector3.Dot(V, R);*/
+
+							specComponent = primitive.Material.SpecularPercentage * (float)Math.Pow(Math.Max(0, specDot), primitive.Material.Specularity) * attenuation;
 						}
 
 						// check for spotlights
@@ -657,9 +660,10 @@ namespace Template
 			Primitives = new List<Primitive>();
 			LightSources = new List<LightSource>();
 			// add 2 standard lightsources and 1 spotlight
-			LightSources.Add(new LightSource { Intensity = new Vector3(40f,40f,40f), Position = new Vector3( 0f, 0f, 5f) });
-			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0f, 0f, -1f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f,10f,10f), Position = new Vector3( 0f, 0f, 5f) });
+			LightSources.Add(new LightSource { Intensity = new Vector3(10f, 10f, 10f), Position = new Vector3(0.3f, 0f, -1f) });
 			LightSources.Add(new Spotlight(new Vector3(0, 5, 4), new Vector3(20f, 20f, 15f), new Vector3(0f, -1, 0), 60));
+			LightSources.Add(new LightSource { Intensity = new Vector3(50f, 50f, 45f), Position = new Vector3(-8f, 5f, 1f) });
 			// add the bottom plane
 			Plane bottom = new Plane(new Vector3(0f, -1.5f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1, 1, 1));
 			bottom.Material.Texture = new Texture("../../assets/checkers.png");
@@ -670,9 +674,9 @@ namespace Template
 			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(1f, 1, 1f), true);
 			texturedSphere.Material.Texture = new Texture("../../assets/globe.jpg");
 			texturedSphere.Material.ReflectPercentage = 0.1f;
-			/*texturedSphere.Material.DiffusePercentage = 0.5f;
-			texturedSphere.Material.SpecularPercentage = 0.5f;
-			texturedSphere.Material.Specularity = 20; */
+			texturedSphere.Material.DiffusePercentage = 0.3f;
+			texturedSphere.Material.SpecularPercentage = 0.7f;
+			texturedSphere.Material.Specularity = 20;
 			Primitives.Add(texturedSphere);
 			// add the right (reflective) sphere
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));
