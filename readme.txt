@@ -37,6 +37,7 @@ Implemented bonus assignments:
 3. Anti-aliasing                ( to enable this, hold T for at least 1 frame. To disable it again: hold Y )
 4. Textures on all primitives   ( the floor plane has a checkerboard pattern, the middle sphere has a skybox as texture and the triangles have a brick texture)
 5. A skydome                    ( one of the skydomes of http://www.pauldebevec.com/Probes/ has been implemented)
+6. Refraction                   ( the sphere on the left has a refraction index of 1.3)
 
 Sources (if i forgot something, there is a chance it is listed as a source in the comments at the appropriate place):
 ray - sphere intersection: adaptation from the slides

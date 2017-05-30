@@ -426,7 +426,7 @@ namespace Template
 				else if(intersect.Primitive.Material.Refract)
 				{
 					Ray refractray = new Ray {Direction = Refract(intersect, ray), Origin = intersect.IntersectionPoint};
-					if (refractray.Direction.Length == 0)
+					if (refractray.Direction.Length < 0.001f && refractray.Direction.Length > -0.001f)
 					{
 						Ray reflectRay = new Ray();
 						reflectRay.Direction = Reflect(ray.Direction, intersect.IntersectionNormal);
@@ -434,7 +434,7 @@ namespace Template
 					}
 					if (recursion++ > MaxRecursion)
 						return intersect.Primitive.Material.Color;
-					refractray.Origin += ray.Direction*0.02f;
+					refractray.Origin += ray.Direction*0.002f;
 					Vector3 res = Trace(refractray, recursion, (saverays!=0) ? saverays +2 : 0);
 					if(saverays == 1 || saverays == 3)
 						refract1.Add(refractray);
@@ -470,6 +470,7 @@ namespace Template
 			return direction - 2 * Vector3.Dot(direction, normal) * normal;
 		}
 
+		// source: https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
 		private Vector3 Refract(Intersection intersect, Ray ray)
 		{
 			Vector3 N = intersect.IntersectionNormal;
@@ -487,11 +488,10 @@ namespace Template
 				float temp = etai;
 				etai = etat;
 				etat = temp;
-				n = -N;
 			}
 			float eta = etai / etat;
 			float k = 1 - eta * eta * ( 1 - cosi * cosi );
-			return k < 0 ? new Vector3(0,0,0) : eta * I + ( eta * cosi - (float) Math.Sqrt(k) ) * n;
+			return k < 0 ? new Vector3(0,0,0) : Vector3.Normalize(eta * I + ( eta * cosi - (float) Math.Sqrt(k) ) * n);
 		}
 
 		// how much is the intersection illuminated (adaptation from the slides)
@@ -725,7 +725,7 @@ namespace Template
 			// add the left (red) sphere
 			Sphere refract = new Sphere(new Vector3(-3f, 0f, 5f), 1.5f, new Vector3(1, 0.1f, 0.1f));
 			refract.Material.Refract = true;
-			refract.Material.RefractionIndex = 1.3f;
+			refract.Material.RefractionIndex = 2f;
 			Primitives.Add(refract);
 			// add the middle (textured) sphere
 			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(1f, 1, 1f), true);
