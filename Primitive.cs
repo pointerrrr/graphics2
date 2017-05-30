@@ -246,6 +246,7 @@ namespace Template
 	{
 		public Vector3 Color { get; set; }
 		public bool Reflect { get; set; }
+		public float ReflectPercentage { get; set; } = 1f;
 		public Texture Texture { get; set; }
 
 		public Material()

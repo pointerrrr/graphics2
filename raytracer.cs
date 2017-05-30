@@ -29,7 +29,7 @@ namespace Template
 		// are we drawing with anti aliazsing
 		public bool DoAA = false;
 		// the maximum recursion depth for reflections
-		public int MaxRecursion = 4;
+		public int MaxRecursion = 16;
 		// private int of antialiasing, used for the public property
 		private int antialiasing;
 		// the sqrt of anti aliasing, used for calculations when using anti aliasing
@@ -309,7 +309,8 @@ namespace Template
 								ray = new Ray();
 								ray.Origin = Camera.Position;
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-								avg[(int) i, (int) j] = Trace(ray, (y == 0 && i == 0 && j == 0) ? 1 : 0);
+								int saverays = (y == 0 && i == 0 && j == 0) ? 1 : 0;
+								avg[(int) i, (int) j] = Trace(ray, 0, saverays, saverays);
 								if (i == 0 && j == 0 && y == 0)
 									rays1.Add(ray);
 							}
@@ -367,7 +368,8 @@ namespace Template
 								ray = new Ray();
 								ray.Origin = Camera.Position;
 								ray.Direction = Vector3.Normalize(onscreen - ray.Origin);
-								avg[(int) i, (int) j] = Trace(ray, ( y == 0 && i == 0 && j == 0 ) ? 2 : 0);
+								int saverays = ( y == 0 && i == 0 && j == 0 ) ? 2 : 0;
+								avg[(int) i, (int) j] = Trace(ray, 0, saverays, saverays);
 								if (i == 0 && j == 0 && y == 0)
 									rays2.Add(ray);
 							}
@@ -410,9 +412,12 @@ namespace Template
 						reflect2.Add(reflectray);
 					// are we within the recursion limit
 					if (recursion++ < MaxRecursion)
-						return intersect.Primitive.Material.Color * Trace(reflectray, recursion);
+						if(intersect.Primitive.Material.ReflectPercentage < 1)
+						return intersect.Primitive.Material.Color * intersect.Primitive.Material.Color * Trace(reflectray, recursion) * intersect.Primitive.Material.ReflectPercentage + intersect.Primitive.Material.Color * Illumination(intersect) * ( 1 - intersect.Primitive.Material.ReflectPercentage);
+						else
+							return intersect.Primitive.Material.Color* intersect.Primitive.Material.Color* Trace(reflectray, recursion);
 					else
-						return new Vector3(intersect.Primitive.Material.Color);
+						return intersect.Primitive.Material.Color;
 				}
 				// regular ray with shadow
 				else
@@ -651,8 +656,9 @@ namespace Template
 			// add the left (red) sphere
 			Primitives.Add(new Sphere(new Vector3(-3f, 0f,5f), 1.5f, new Vector3(1,0.1f,0.1f)));
 			// add the middle (textured) sphere
-			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f, 1, 0.1f));
+			Sphere texturedSphere = new Sphere(new Vector3(0f, 0f, 3f), 1.5f, new Vector3(0.1f, 1, 0.1f), true);
 			texturedSphere.Material.Texture = new Texture("../../assets/uffizi_probe.jpg");
+			texturedSphere.Material.ReflectPercentage = 0.3f;
 			Primitives.Add(texturedSphere);
 			// add the right (reflective) sphere
 			Primitives.Add(new Sphere(new Vector3(3f, 0f, 5f), 1.5f, new Vector3(1f, 1f, 1f), true));

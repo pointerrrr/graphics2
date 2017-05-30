@@ -43,8 +43,8 @@ namespace Template {
 			// from here it's the debug view drawing
 			screen2.Clear(0x0);
 			// draw text:
-			if(raytracer.DoAA)
-				screen2.Print("Anti-aliasing:" + raytracer.Antialiasing + "x", 2,2 , RGB(1, 1, 0));
+			if (raytracer.DoAA)
+				screen2.Print("Anti-aliasing:" + raytracer.Antialiasing + "x", 2, 2, RGB(1, 1, 0));
 			else
 				screen2.Print("Anti-aliasing:" + raytracer.DoAA, 2, 2, RGB(1, 1, 0));
 			screen2.Print("Recursion depth:" + raytracer.MaxRecursion, 2, 17, RGB(1, 1, 0));
@@ -58,8 +58,8 @@ namespace Template {
 					Ray ray = raytracer.rays[x];
 
 					Vector3 point2;
-					point2 = ( ray.Direction * Math.Min(ray.Distance, 100) ) + ray.Origin;
-					screen2.Line(TX(ray.Origin.X), TZ(ray.Origin.Z), ( TX(point2.X) ), ( TZ(point2.Z) ), RGB(1, 1, 1));
+					point2 = ray.Direction*Math.Min(ray.Distance, 100) + ray.Origin;
+					screen2.Line(TX(ray.Origin.X), TZ(ray.Origin.Z), TX(point2.X), TZ(point2.Z), RGB(1, 1, 1));
 				}
 			}
 			// draw the shadow rays in red
@@ -68,8 +68,8 @@ namespace Template {
 				Ray shadowRay = raytracer.shadowrays[i];
 				if (shadowRay != null)
 				{
-					Vector3 point2S = ( shadowRay.Direction * Math.Min(shadowRay.Distance, 100) ) + shadowRay.Origin;
-					screen2.Line(( TX(point2S.X) ), ( TZ(point2S.Z) ), TX(shadowRay.Origin.X), TZ(shadowRay.Origin.Z), RGB(1, 0, 0));
+					Vector3 point2S = (shadowRay.Direction*Math.Min(shadowRay.Distance, 100)) + shadowRay.Origin;
+					screen2.Line(TX(point2S.X), TZ(point2S.Z), TX(shadowRay.Origin.X), TZ(shadowRay.Origin.Z), RGB(1, 0, 0));
 				}
 			}
 			// draw the secondary rays in cyan
@@ -78,18 +78,18 @@ namespace Template {
 				Ray reflectRay = raytracer.reflectrays[i];
 				if (reflectRay != null)
 				{
-					Vector3 point2S = ( reflectRay.Direction * Math.Min(reflectRay.Distance, 100) ) + reflectRay.Origin;
-					screen2.Line(( TX(point2S.X) ), ( TZ(point2S.Z) ), TX(reflectRay.Origin.X), TZ(reflectRay.Origin.Z), RGB(0, 1f, 1));
+					Vector3 point2S = (reflectRay.Direction*Math.Min(reflectRay.Distance, 100)) + reflectRay.Origin;
+					screen2.Line(TX(point2S.X), TZ(point2S.Z), TX(reflectRay.Origin.X), TZ(reflectRay.Origin.Z), RGB(0, 1f, 1));
 				}
 			}
 			// draw the primitives
 			List<Primitive> primitives = raytracer.Scene.Primitives;
-			foreach(Primitive primitive in primitives)
+			foreach (Primitive primitive in primitives)
 			{
 				if (primitive.GetType() == typeof(Sphere))
 				{
 					Sphere temp = (Sphere) primitive;
-					screen2.Circle(TX(temp.Position.X), TZ(temp.Position.Z), (int)(temp.Radius * 51.2 +1 ), RGB(temp.Material.Color));
+					screen2.Circle(TX(temp.Position.X), TZ(temp.Position.Z), TL(temp.Radius), RGB(temp.Material.Color));
 				}
 				else if (primitive.GetType() == typeof(Triangle))
 				{
@@ -142,22 +142,22 @@ namespace Template {
 			if (NewKeyPress(Key.W))
 			{
 				raytracer.Smoothdraw = false;
-				raytracer.Camera.Position +=  new Vector3(raytracer.Camera.Direction.X, 0, raytracer.Camera.Direction.Z) * 0.1f;
+				raytracer.Camera.Position += new Vector3(raytracer.Camera.Direction.X, 0, raytracer.Camera.Direction.Z)*0.1f;
 			}
 			if (NewKeyPress(Key.S))
 			{
 				raytracer.Smoothdraw = false;
-				raytracer.Camera.Position -= new Vector3(raytracer.Camera.Direction.X, 0, raytracer.Camera.Direction.Z) * 0.1f;
+				raytracer.Camera.Position -= new Vector3(raytracer.Camera.Direction.X, 0, raytracer.Camera.Direction.Z)*0.1f;
 			}
 			if (NewKeyPress(Key.A))
 			{
 				raytracer.Smoothdraw = false;
-				raytracer.Camera.Position -= new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * 0.1f;
+				raytracer.Camera.Position -= new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X)*0.1f;
 			}
 			if (NewKeyPress(Key.D))
 			{
 				raytracer.Smoothdraw = false;
-				raytracer.Camera.Position += new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X) * 0.1f;
+				raytracer.Camera.Position += new Vector3(raytracer.Camera.Direction.Z, 0, -raytracer.Camera.Direction.X)*0.1f;
 			}
 			if (NewKeyPress(Key.Z))
 			{
@@ -197,6 +197,7 @@ namespace Template {
 			// enable aa
 			if (NewKeyPress(Key.T))
 			{
+				raytracer.Smoothdraw = true;
 				raytracer.DoAA = true;
 			}
 			// disable aa
@@ -209,26 +210,33 @@ namespace Template {
 		// check if a key was pressed this frame
 		public bool NewKeyPress(Key key)
 		{
-			return ( currentKeyState[key] && ( currentKeyState[key] != prevKeyState[key] ) );
+			return currentKeyState[key] && (currentKeyState[key] != prevKeyState[key]);
 		}
 
-		//convert given x world coordinate to screen coordinates
+		// convert given x world coordinate to screen coordinates
 		public int TX(float x)
 		{
 			x += origX;
-			x += scaleX / 2;
-			x *= screen2.width / scaleX;
+			x += scaleX/2;
+			x *= screen2.width/scaleX;
 			return (int) x;
 		}
 
-		//convert given z world coordinate to screen coordinates
+		// convert given z world coordinate to screen coordinates
 		public int TZ(float z)
 		{
 			z += origY;
-			z += scaleY / 2;
-			z *= screen2.height / scaleY;
+			z += scaleY/2;
+			z *= screen2.height/scaleY;
 			z = screen2.height - z;
 			return (int) z;
+		}
+
+		// translate world length to screen length
+		public int TL(float l)
+		{
+			l *= screen2.width / scaleX;
+			return (int) l;
 		}
 
 		// convert 3 floats to an rgb int
